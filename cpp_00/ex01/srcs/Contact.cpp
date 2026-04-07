@@ -7,7 +7,8 @@
 //	void			setPhone(std::string phone);
 //	void			setSecret(std::string secret);
 
-void Contact::setFirstName(std::string firstname)
+
+void	Contact::setFirstName(std::string firstname)
 {
 	this->_firstName = firstname;
 }

@@ -1,6 +1,13 @@
 
 #include "../includes/PhoneBook.hpp"
 
+
+int	PhoneBook::contact_counter()
+{
+	this->_count++;
+	return(this->_count % 8);
+}
+
 void	print_usage(void)
 {
 	std::cout << "Usage :" << std::endl;
@@ -13,6 +20,7 @@ void	print_usage(void)
 void PhoneBook::addContact()
 {
 	Contact		contact;
+	PhoneBook	phonebook;
 	std::string	input;
 
 	std::cout << "Please enter the following informations" << std::endl;
