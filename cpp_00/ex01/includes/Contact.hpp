@@ -1,9 +1,6 @@
 #ifndef CONTACT_HPP
 # define CONTACT_HPP
 
-#include <iostream>
-#include <string>
-
 class Contact
 {
 private:
@@ -15,8 +12,6 @@ private:
 	std::string		_secret;
 
 public:
-	Contact();
-	~Contact();
 
 	// Getters
 	std::string		getLastName(void)const;
