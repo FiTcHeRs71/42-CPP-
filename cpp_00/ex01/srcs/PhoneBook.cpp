@@ -20,19 +20,26 @@ void	print_usage(void)
 void PhoneBook::addContact()
 {
 	Contact		contact;
-	PhoneBook	phonebook;
 	std::string	input;
 
 	std::cout << "Please enter the following informations" << std::endl;
 	std::cout << "FirstName : ";
 	std::getline(std::cin, input);
-	Contact::setFirstName(input);
+	contact.setFirstName(input);
+
 	std::cout << "LastName : ";
 	std::getline(std::cin, input);
+	contact.setLastName(input);
+
 	std::cout << "NickName : ";
 	std::getline(std::cin, input);
+	contact.setNickName(input);
+
 	std::cout << "Phone number : ";
 	std::getline(std::cin, input);
+	contact.setPhone(input);
+
 	std::cout << "Darkest secret : ";
 	std::getline(std::cin, input);
+	contact.setSecret(input);
 }
