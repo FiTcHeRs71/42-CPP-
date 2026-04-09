@@ -20,6 +20,18 @@ int	PhoneBook::contact_counter()
 	return(pos_index);
 }
 
+std::string	PhoneBook::addParams(std::string params)
+{
+	std::string	input;
+	while (input.empty())
+	{
+		std::cout << params;
+		if (!std::getline(std::cin, input))
+			continue;
+	}
+	return(input);
+}
+
 void	print_usage(void)
 {
 	std::cout << std::endl;
@@ -41,52 +53,11 @@ void	PhoneBook::addContact()
 	std::string	input;
 
 	std::cout << "Please enter the following informations" << std::endl;
-
-	std::cout << "FirstName : ";
-	std::getline(std::cin, input);
-	if(input.empty())
-	{
-		std::cout << "The field cannot be empty " << std::endl;
-		return ;
-	}
-	contact.setFirstName(input);
-
-	std::cout << "LastName : ";
-	std::getline(std::cin, input);
-	if(input.empty())
-	{
-		std::cout << "The field cannot be empty " << std::endl;
-		return ;
-	}
-	contact.setLastName(input);
-
-	std::cout << "NickName : ";
-	std::getline(std::cin, input);
-	if(input.empty())
-	{
-		std::cout << "The field cannot be empty " << std::endl;
-		return ;
-	}
-	contact.setNickName(input);
-
-	std::cout << "Phone number : ";
-	std::getline(std::cin, input);
-	if(input.empty())
-	{
-		std::cout << "The field cannot be empty " << std::endl;
-		return ;
-	}
-	contact.setPhone(input);
-
-	std::cout << "Darkest secret : ";
-	std::getline(std::cin, input);
-	if(input.empty())
-	{
-		std::cout << "The field cannot be empty " << std::endl;
-		return ;
-	}
-	contact.setSecret(input);
-
+	contact.setFirstName(addParams("FirstName : "));
+	contact.setLastName(addParams("LastName : "));
+	contact.setNickName(addParams("NickName : "));
+	contact.setPhone(addParams("Phone number : "));
+	contact.setSecret(addParams("Darkest secret : "));
 	this->addContact(contact);
-	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << PhoneBook::getIndex() - 1 << std::endl;
+	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << this->getIndex() - 1 << std::endl;
 }

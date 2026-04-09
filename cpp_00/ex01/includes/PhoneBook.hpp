@@ -21,10 +21,13 @@ public:
 	//Setters
 	void	addContact();
 	void	addContact(Contact & contact);
-	int	contact_counter();
 
 	//Getters
 	int		getIndex(void);
+
+	//Others
+	int	contact_counter();
+	std::string	addParams(std::string params);
 	//void	search()const;
 };
 
