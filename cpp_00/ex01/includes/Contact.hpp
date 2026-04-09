@@ -26,6 +26,9 @@ public:
 	void			setNickName(std::string nickName);
 	void			setPhone(std::string phone);
 	void			setSecret(std::string secret);
+
+	// Others
+	void			print(void)const;
 };
 
 #endif

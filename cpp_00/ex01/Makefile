@@ -8,7 +8,7 @@ SRCS_MAIN = main.cpp
 SRCDIR = srcs
 
 SRCS_FILES = $(addprefix $(SRCDIR)/, \
-	Contact.cpp PhoneBook.cpp)
+	Contact.cpp Contact_utils.cpp PhoneBook.cpp PhoneBook_utils.cpp)
 
 # Source files
 SRCS = $(SRCS_MAIN) $(SRCS_FILES)

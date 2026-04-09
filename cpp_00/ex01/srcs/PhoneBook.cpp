@@ -8,23 +8,23 @@ PhoneBook::PhoneBook()
 
 PhoneBook::~PhoneBook(){}
 
-int	PhoneBook::getIndex(void)
+void	PhoneBook::search()const
 {
-	return this->_count;
-}
+	std::string	input;
+	int			index;
 
-int	PhoneBook::contact_counter()
-{
-	if (this->_count == 8)
-	this->_count = 0;
-	int	pos_index = this->_count % 8;
-	this->_count++;
-	return(pos_index);
+	std::cout << "Contact index : ";
+	std::getline(std::cin, input);
+	if (is_number(input) == true)
+		return (print_error(DIGIT_ERROR));
+	index = std::atoi(input.c_str());
+	this->_contact[index].print();
 }
 
 std::string	PhoneBook::addParams(std::string params)
 {
 	std::string	input;
+
 	while (input.empty())
 	{
 		std::cout << params;
@@ -32,16 +32,6 @@ std::string	PhoneBook::addParams(std::string params)
 			return ("");
 	}
 	return(input);
-}
-
-void	print_usage(void)
-{
-	std::cout << std::endl;
-	std::cout << "Usage :" << std::endl;
-	std::cout << "ADD\t Save a new contact." << std::endl;
-	std::cout << "SEARCH\t Find and display a contact of the PhoneBook." << std::endl;
-	std::cout << "EXIT\t Exit this wonderfull programe made by fducrot." << std::endl;
-	std::cout << std::endl;
 }
 
 void	PhoneBook::addContact(Contact & contact)
@@ -57,19 +47,19 @@ void	PhoneBook::addContact()
 	std::cout << "Please enter the following informations" << std::endl;
 	contact.setFirstName(addParams("FirstName : "));
 	if (std::cin.eof())
-		return ;
+		return (print_error(MANUAL_STOP));
 	contact.setLastName(addParams("LastName : "));
 		if (std::cin.eof())
-		return ;
+		return (print_error(MANUAL_STOP));
 	contact.setNickName(addParams("NickName : "));
 		if (std::cin.eof())
-		return ;
+		return (print_error(MANUAL_STOP));
 	contact.setPhone(addParams("Phone number : "));
 		if (std::cin.eof())
-		return ;
+		return (print_error(MANUAL_STOP));;
 	contact.setSecret(addParams("Darkest secret : "));
 		if (std::cin.eof())
-		return ;
+		return (print_error(MANUAL_STOP));;
 	this->addContact(contact);
-	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << this->getIndex() - 1 << std::endl;
+	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << (this->getIndex() - 1) % 8 << std::endl;
 }

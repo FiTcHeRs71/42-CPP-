@@ -1,52 +1,13 @@
 
 #include "../includes/PhoneBook.hpp"
 
-void	Contact::setFirstName(std::string firstname)
+void	Contact::print(void)const
 {
-	this->_firstName = firstname;
-}
-
-void	Contact::setLastName(std::string lastName)
-{
-	this->_lastName = lastName;
-}
-
-void	Contact::setNickName(std::string nickName)
-{
-	this->_nickName= nickName;
-}
-
-void	Contact::setPhone(std::string phone)
-{
-	this->_phone = phone;
-}
-
-void	Contact::setSecret(std::string secret)
-{
-	this->_secret = secret;
-}
-
-std::string		Contact::getLastName(void)const
-{
-	return this->_lastName;
-}
-
-std::string		Contact::getFirstName(void)const
-{
-	return this->_firstName;
-}
-
-std::string		Contact::getNickName(void)const
-{
-	return this->_nickName;
-}
-
-std::string		Contact::getPhone(void)const
-{
-	return this->_phone;
-}
-
-std::string		Contact::getSecret(void)const
-{
-	return this->_secret;
+	std::cout << std::endl;
+	std::cout << "< First name > : " << this->_firstName << std::endl;
+	std::cout << "< Last name > : " << this->_lastName << std::endl;
+	std::cout << "< Nick name > : " << this->_nickName << std::endl;
+	std::cout << "< Phone number > : " << this->_phone << std::endl;
+	std::cout << "< Darkest secret > : " << this->_secret << std::endl;
+	std::cout << std::endl;
 }
