@@ -17,6 +17,8 @@ public:
 
 	//Setters
 	void	addContact();
+	void	addContact(Contact & contact);
+	void	initCount();
 	int	contact_counter();
 	//void	search()const;
 };

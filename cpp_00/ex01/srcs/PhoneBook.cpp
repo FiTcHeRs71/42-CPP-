@@ -1,6 +1,10 @@
 
 #include "../includes/PhoneBook.hpp"
 
+void	PhoneBook::initCount()
+{
+	this->_count = 0;
+}
 
 int	PhoneBook::contact_counter()
 {
@@ -10,6 +14,7 @@ int	PhoneBook::contact_counter()
 
 void	print_usage(void)
 {
+	std::cout << std::endl;
 	std::cout << "Usage :" << std::endl;
 	std::cout << "ADD\t Save a new contact." << std::endl;
 	std::cout << "SEARCH\t Find and display a contact of the PhoneBook." << std::endl;
@@ -17,12 +22,18 @@ void	print_usage(void)
 	std::cout << std::endl;
 }
 
-void PhoneBook::addContact()
+void	PhoneBook::addContact(Contact & concact)
+{
+	this->_contact[contact_counter()] = concact;
+}
+
+void	PhoneBook::addContact()
 {
 	Contact		contact;
 	std::string	input;
 
 	std::cout << "Please enter the following informations" << std::endl;
+
 	std::cout << "FirstName : ";
 	std::getline(std::cin, input);
 	contact.setFirstName(input);
@@ -42,4 +53,7 @@ void PhoneBook::addContact()
 	std::cout << "Darkest secret : ";
 	std::getline(std::cin, input);
 	contact.setSecret(input);
+
+	this->addContact(contact);
+	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED" << std::endl;
 }

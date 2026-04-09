@@ -11,11 +11,6 @@ void	Contact::setLastName(std::string lastName)
 	this->_lastName = lastName;
 }
 
-void	Contact::setFirstName(std::string firstName)
-{
-	this->_firstName= firstName;
-}
-
 void	Contact::setNickName(std::string nickName)
 {
 	this->_nickName= nickName;
