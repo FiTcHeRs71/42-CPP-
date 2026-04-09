@@ -15,6 +15,8 @@ int	PhoneBook::getIndex(void)
 
 int	PhoneBook::contact_counter()
 {
+	if (this->_count == 8)
+	this->_count = 0;
 	int	pos_index = this->_count % 8;
 	this->_count++;
 	return(pos_index);
@@ -27,7 +29,7 @@ std::string	PhoneBook::addParams(std::string params)
 	{
 		std::cout << params;
 		if (!std::getline(std::cin, input))
-			continue;
+			return ("");
 	}
 	return(input);
 }
@@ -38,7 +40,7 @@ void	print_usage(void)
 	std::cout << "Usage :" << std::endl;
 	std::cout << "ADD\t Save a new contact." << std::endl;
 	std::cout << "SEARCH\t Find and display a contact of the PhoneBook." << std::endl;
-	std::cout << "EXIT\t Exit this Programe made by fducrot." << std::endl;
+	std::cout << "EXIT\t Exit this wonderfull programe made by fducrot." << std::endl;
 	std::cout << std::endl;
 }
 
@@ -54,10 +56,20 @@ void	PhoneBook::addContact()
 
 	std::cout << "Please enter the following informations" << std::endl;
 	contact.setFirstName(addParams("FirstName : "));
+	if (std::cin.eof())
+		return ;
 	contact.setLastName(addParams("LastName : "));
+		if (std::cin.eof())
+		return ;
 	contact.setNickName(addParams("NickName : "));
+		if (std::cin.eof())
+		return ;
 	contact.setPhone(addParams("Phone number : "));
+		if (std::cin.eof())
+		return ;
 	contact.setSecret(addParams("Darkest secret : "));
+		if (std::cin.eof())
+		return ;
 	this->addContact(contact);
 	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << this->getIndex() - 1 << std::endl;
 }

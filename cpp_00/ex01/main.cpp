@@ -27,5 +27,6 @@ int main(void)
 		}
 		print_usage();
 	}
+	std::cout << "Exit this wonderfull programe made by fducrot." << std::endl;
 	return (0);
 }
