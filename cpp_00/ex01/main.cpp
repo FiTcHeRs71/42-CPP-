@@ -6,7 +6,6 @@ int main(void)
 	std::string	input;
 	PhoneBook	phonebook;
 
-	phonebook.initCount();
 	std::cout << "Welcome to your awesome PHONEBOOK !\n" <<  std::endl;
 	print_usage();
 	while (!std::cin.eof())
@@ -24,7 +23,7 @@ int main(void)
 		else if (input == "EXIT")
 		{
 			std::cout << "PhoneBook is closing, Exit" << std::endl;
-			exit(0);
+			return(0);
 		}
 		print_usage();
 	}

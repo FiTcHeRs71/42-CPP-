@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <string>
-#include <cstdlib>
 #include "Contact.hpp"
 
 class PhoneBook
@@ -15,11 +14,17 @@ private:
 
 public:
 
+	//Constructor & Destructor
+	PhoneBook();
+	~PhoneBook();
+
 	//Setters
 	void	addContact();
 	void	addContact(Contact & contact);
-	void	initCount();
 	int	contact_counter();
+
+	//Getters
+	int		getIndex(void);
 	//void	search()const;
 };
 
