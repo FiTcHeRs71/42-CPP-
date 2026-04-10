@@ -3,15 +3,17 @@
 
 /* ==================== LIBRAIRIES & HEADERS ==================== */
 
-#include <iostream>
-#include <string>
-#include <bits/stdc++.h>
-#include "Contact.hpp"
+# include <iostream>
+# include <string>
+# include <iomanip>
+# include <cstdlib>
+# include "Contact.hpp"
 
 /* ==================== MESSAGES ==================== */
 
-#define DIGIT_ERROR "Please enter only digit characters"
-#define MANUAL_STOP "Manual interruption, the contact has not been added "
+# define DIGIT_ERROR "Please enter only digit characters."
+# define DIGIT_RANGE_ERROR "Please select a contact between 1 and 8 range."
+# define MANUAL_STOP "Manual interruption, the contact has not been added."
 
 
 class PhoneBook

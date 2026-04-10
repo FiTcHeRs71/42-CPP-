@@ -13,11 +13,19 @@ void	PhoneBook::search()const
 	std::string	input;
 	int			index;
 
+	print_graphic_tab("┌", "┬", "┐");
+	std::cout << std::endl;
+	for (int i = 0; i < 8; i++)
+		this->_contact[i].printRow(i);
+	print_graphic_tab("└", "┴", "┘");
+	std::cout << std::endl;
 	std::cout << "Contact index : ";
 	std::getline(std::cin, input);
-	if (is_number(input) == true)
+	if (!is_number(input))
 		return (print_error(DIGIT_ERROR));
 	index = std::atoi(input.c_str());
+	if (index < 0 || index > 9)
+		return (print_error(DIGIT_RANGE_ERROR));
 	this->_contact[index].print();
 }
 

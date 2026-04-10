@@ -29,6 +29,9 @@ public:
 
 	// Others
 	void			print(void)const;
+	void 			printRow(int index) const;
 };
+
+void	print_graphic_tab(std::string corner_l, std::string col, std::string corner_r);
 
 #endif

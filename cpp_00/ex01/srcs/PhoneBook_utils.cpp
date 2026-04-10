@@ -34,7 +34,7 @@ bool	is_number(std::string str)
 {
 	for (int i = 0; i < (int)str.size(); i++)
 	{
-		if (isdigit(str[i]))
+		if (isdigit(str[i]) <= 0)
 			return (false);
 	}
 	return (true);
