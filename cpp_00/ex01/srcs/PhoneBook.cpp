@@ -21,10 +21,10 @@ void	PhoneBook::search()const
 	std::cout << std::endl;
 	std::cout << "Contact index : ";
 	std::getline(std::cin, input);
-	if (!is_number(input))
+	if (!is_number(input) || input.empty())
 		return (print_error(DIGIT_ERROR));
 	index = std::atoi(input.c_str());
-	if (index < 0 || index > 9)
+	if (index < 0 || index > 7)
 		return (print_error(DIGIT_RANGE_ERROR));
 	this->_contact[index].print();
 }
@@ -64,10 +64,10 @@ void	PhoneBook::addContact()
 		return (print_error(MANUAL_STOP));
 	contact.setPhone(addParams("Phone number : "));
 		if (std::cin.eof())
-		return (print_error(MANUAL_STOP));;
+		return (print_error(MANUAL_STOP));
 	contact.setSecret(addParams("Darkest secret : "));
 		if (std::cin.eof())
-		return (print_error(MANUAL_STOP));;
+		return (print_error(MANUAL_STOP));
 	this->addContact(contact);
 	std::cout << "THE CONTACT HAS BEEN SUCCESFULLY SAVED AT INDEX " << (this->getIndex() - 1) % 8 << std::endl;
 }

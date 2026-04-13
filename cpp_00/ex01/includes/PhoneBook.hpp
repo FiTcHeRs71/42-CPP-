@@ -12,7 +12,7 @@
 /* ==================== MESSAGES ==================== */
 
 # define DIGIT_ERROR "Please enter only digit characters."
-# define DIGIT_RANGE_ERROR "Please select a contact between 1 and 8 range."
+# define DIGIT_RANGE_ERROR "Please select a contact between 0 and 7 range."
 # define MANUAL_STOP "Manual interruption, the contact has not been added."
 
 

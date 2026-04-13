@@ -26,6 +26,6 @@ int main(void)
 			return(0);
 		}
 	}
-	std::cout << "Exit this wonderfull programe made by fducrot." << std::endl;
+	std::cout << std::endl << "Exit this wonderfull programe made by fducrot." << std::endl;
 	return (0);
 }
