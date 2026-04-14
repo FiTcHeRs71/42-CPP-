@@ -52,6 +52,6 @@ re: fclean all
  
 run: all
 	@echo "$(GREEN)🚀 Running $(NAME)...$(RESET)"
-	@./$(NAME)
+	@./$(NAME) > log_test.log
  
 .PHONY: all clean fclean re run
