@@ -7,7 +7,7 @@ OBJDIR = objs
 SRCS_MAIN = main.cpp
 SRCDIR = srcs
 
-SRCS_FILES = Zombie.cpp
+SRCS_FILES = Zombie.cpp randomChump.cpp newZombie.cpp
 
 # Source files
 SRCS = $(SRCS_MAIN) $(SRCS_FILES)
@@ -17,7 +17,7 @@ OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
  
 # Compiler and flags
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98
  
 # Colors
 GREEN = \033[0;32m

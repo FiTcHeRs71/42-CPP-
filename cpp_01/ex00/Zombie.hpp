@@ -4,15 +4,31 @@
 
 # include <iostream>
 # include <iomanip>
+#include <string>
 
 class Zombie
 {
 private:
-	/* data */
+	std::string	_name;
 public:
-	Zombie(/* args */);
-	~Zombie();
+
+	/*===Constructor & Destructor===*/
+	Zombie(void);
+	~Zombie(void);
+
+	/*===Getters & Setters===*/
+	std::string	getZombieName(void)const;
+	void		setZombieName(std::string name);
+
+	/*===Others===*/
+	void	announce(void);
+
 };
 
+	Zombie* newZombie( std::string name );
+	/*This function creates a zombie, names it, and returns it so you can use it outside
+of the function scope.*/
+	void randomChump( std::string name );
+	/*This function creates a zombie, names it, and makes it announce itself.*/
 
 #endif /*_ZOMBIE_HPP_*/
