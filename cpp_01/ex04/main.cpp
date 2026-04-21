@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <cstdlib>
 
 static void	ft_error(std::string error_msg)
 {
