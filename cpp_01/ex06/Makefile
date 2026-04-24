@@ -1,5 +1,5 @@
 # Program name
-NAME = harl
+NAME = harlFilter
  
 # Directories
 OBJDIR = objs
