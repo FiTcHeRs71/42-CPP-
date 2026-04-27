@@ -2,8 +2,9 @@
 #include "Zombie.hpp"
 
 /*== Constructor & Destructor ==*/
-Zombie::Zombie(void) 
+Zombie::Zombie(std::string name) 
 {
+	this->_name = name;
 	std::cout << "Zombie construstor called" << std::endl;
 }
 

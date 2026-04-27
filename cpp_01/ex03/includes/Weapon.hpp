@@ -17,7 +17,7 @@ class Weapon
 	~Weapon(void);
 
 	/*===Getters & Setters===*/
-	std::string	getType(void)const;
+	const std::string&	getType(void)const;
 	void		setType(std::string type);
 
 	/*===Others===*/

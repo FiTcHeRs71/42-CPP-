@@ -11,4 +11,6 @@ int	main(void)
 
 	orgrimmar[0].announce();
 	dalaran[9].announce();
+	delete [] orgrimmar;
+	delete [] dalaran;
 }

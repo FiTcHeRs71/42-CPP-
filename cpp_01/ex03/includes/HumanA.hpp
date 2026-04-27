@@ -18,7 +18,6 @@ class	HumanA
 
 	/*=== Others ===*/
 	void	attack(void);
-	void	setWeapon(Weapon &weapon);
 };
 
 

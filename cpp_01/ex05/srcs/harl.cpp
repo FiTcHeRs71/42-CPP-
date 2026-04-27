@@ -37,10 +37,6 @@ void	Harl::complain(std::string level)
 	std::string	complains[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
 
 	for (int i = 0; i < 4; i++)
-	{
 		if (level == complains[i])
-		{
-			(this->*functionPTRS[i])();
-		}
-	}
+			return (this->*functionPTRS[i])();
 }

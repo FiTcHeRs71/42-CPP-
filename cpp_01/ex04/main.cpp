@@ -45,8 +45,6 @@ static void	sed(std::ifstream & infile, std::ofstream & outfile, std::string sea
 	std::string file_content = copy_file(infile);
 	std::string replace_content;
 
-	if (search.empty())
-		ft_error("Search pattern can't be empty");
 	replace_content = filter(search,replace, file_content);
 	outfile << replace_content;
 }
@@ -58,14 +56,17 @@ int main(int argc, char **argv)
 		ft_error("Error\nUsage : ./sed <filename> <search> <replace>");
 		return (1);
 	}
-	std::ifstream infile(argv[1]);
+	std::ifstream	infile(argv[1]);
 	if (!infile.is_open())
 	{
 		ft_error("Error: Cannot open file");
 		return (1);
 	}
-	std::string outname = std::string(argv[1]) + ".replace";
-	std::ofstream outfile(outname.c_str());
-	sed(infile, outfile, argv[2], argv[3]);
+	std::string		search = argv[2];
+	if (search.empty())
+		ft_error("Search pattern can't be empty");
+	std::string		outname = std::string(argv[1]) + ".replace";
+	std::ofstream	outfile(outname.c_str());
+	sed(infile, outfile, search, argv[3]);
 	return (0);
 }

@@ -35,7 +35,7 @@ void	Harl::_error(void)
 void	Harl::complain(std::string level) 
 {
 	std::string	complains[] = {"DEBUG", "INFO", "WARNING", "ERROR"};
-	int			idx = 0;
+	int			idx = -1;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -55,6 +55,7 @@ void	Harl::complain(std::string level)
 			this->_warning();
 		case 3 :
 			this->_error();
+			break;
 		default:
 			std::cout << "[ Probably complaining about insignificant problems ]";
 	}

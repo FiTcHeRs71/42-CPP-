@@ -3,8 +3,7 @@
 
 void	randomChump( std::string name )
 {
-	Zombie	heap_zombie;
+	Zombie	heap_zombie = Zombie(name);
 
-	heap_zombie.setZombieName(name);
 	heap_zombie.announce();
 }

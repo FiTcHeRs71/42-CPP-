@@ -13,7 +13,7 @@ private:
 public:
 
 	/*===Constructor & Destructor===*/
-	Zombie(void);
+	Zombie(std::string name);
 	~Zombie(void);
 
 	/*===Getters & Setters===*/

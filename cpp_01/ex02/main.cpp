@@ -13,7 +13,7 @@ int	main(void)
 	std::cout << "variable declared is brain_str and comtains : " << brain_str << std::endl << std::endl;
 
 	std::cout << std::setw(40) << "Memory adress of the string :" << &brain_str << std::endl;
-	std::cout << std::setw(40) << "Memory adress of the string pointer :" << &stringPTR << std::endl;
+	std::cout << std::setw(40) << "Memory adress of the string pointer :" << stringPTR << std::endl;
 	std::cout << std::setw(40) << "Memory adress of the string reference :" << &stringREF << std::endl;
 	std::cout << std::endl;
 	std::cout << std::setw(40) << "Value of string varible :" << brain_str << std::endl;
