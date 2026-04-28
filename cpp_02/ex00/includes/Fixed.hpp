@@ -7,8 +7,8 @@ class Fixed
 {
 	private:
 
-	int					value;
-	static const int	fracto_value;
+	int					_value;
+	static const int	_fracto_value;
 
 	public:
 

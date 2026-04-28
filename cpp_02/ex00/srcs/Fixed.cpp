@@ -1,11 +1,13 @@
 
 #include "../includes/Fixed.hpp"
 
+const int Fixed::_fracto_value = 8;
+
 /*===Canonical Form===*/
 Fixed::Fixed(void)
 {
 	std::cout << "Default constructor called" << std::endl;
-	this->value = 0;
+	this->_value = 0;
 }
 
 Fixed::~Fixed(void)
@@ -16,7 +18,7 @@ Fixed::~Fixed(void)
 Fixed::Fixed(const Fixed &in_fixed) // <-- Copy contructor
 {
 	std::cout << "Copy constructor called" << std::endl;
-	this->value = in_fixed.value;
+	this->_value = in_fixed._value;
 }
 
 Fixed & Fixed::operator=(const Fixed& in_fixed) // <-- Assignement operator
@@ -24,7 +26,7 @@ Fixed & Fixed::operator=(const Fixed& in_fixed) // <-- Assignement operator
 	std::cout << "Copy assignment operator called" << std::endl;
 	if (this != &in_fixed)
 	{
-		this->value = in_fixed.value;
+		this->_value = in_fixed._value;
 	}
 	return (*this);
 }
@@ -33,10 +35,10 @@ Fixed & Fixed::operator=(const Fixed& in_fixed) // <-- Assignement operator
 int		Fixed::getRawBits( void ) const
 {
 	std::cout << "getRawBits member function called" << std::endl;
-	return this->value;
+	return this->_value;
 }
 
 void	Fixed::setRawBits( int const raw )
 {
-	this->value = raw;
+	this->_value = raw;
 }
