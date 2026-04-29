@@ -1,4 +1,4 @@
-
+/*
 #include "sandbox.hpp"
 
 student::student(void) {}
@@ -30,4 +30,17 @@ int main(void)
 	fred.setName("Fichers");
 	fred.setNote(18);
 	std::cout << fred.getName() << " a eu la note de " << fred.getNote() << std::endl;
-}
+}*/
+
+/*
+#include <iostream>     // std::cout
+#include <algorithm>    // std::max
+
+int main () 
+{
+	std::cout << "max(1,2)==" << std::max(1,2) << '\n';
+	std::cout << "max(2,1)==" << std::max(2,1) << '\n';
+	std::cout << "max('a','z')==" << std::max('a','z') << '\n';
+	std::cout << "max(3.14,2.73)==" << std::max(3.14,2.73) << '\n';
+	return 0;
+}*/
