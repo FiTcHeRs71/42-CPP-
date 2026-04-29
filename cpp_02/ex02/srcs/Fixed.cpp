@@ -1,24 +1,23 @@
 
 #include "../includes/Fixed.hpp"
+#include <cmath>
 
-const int	_fracto_bits = 8;
+const int	Fixed::_fracto_bits = 8;
 
 /*===Canonical Form===*/
-Fixed::Fixed(void)
+Fixed::Fixed(void) : _fixed_p_value(0)
 {
 	std::cout << "Default constructor called" << std::endl;
 }
 
-Fixed::Fixed(const int value)
+Fixed::Fixed(const int value) : _fixed_p_value(value * (1 << _fracto_bits))
 {
 	std::cout << "Int constructor called" << std::endl;
-	this->_fixed_p_value = value * (1 << _fracto_bits);
 }
 
-Fixed::Fixed(const float value)
+Fixed::Fixed(const float value) : _fixed_p_value(roundf(value * (1 << _fracto_bits)))
 {
 	std::cout << "Float constructor called" << std::endl;
-	this->_fixed_p_value = value * (1 << _fracto_bits);
 }
 
 Fixed::~Fixed(void)
@@ -90,24 +89,36 @@ bool	Fixed::operator!=(const Fixed& other) const
 	return (false);
 }
 
-int		Fixed::operator+(const Fixed& other) const
+Fixed	Fixed::operator+(const Fixed& other) const
 {
-	return (this->_fixed_p_value + other._fixed_p_value);
+	Fixed	result;
+
+	result = this->_fixed_p_value + other._fixed_p_value;
+	return (result);
 }
 
-int		Fixed::operator-(const Fixed& other) const
+Fixed	Fixed::operator-(const Fixed& other) const
 {
-	return (this->_fixed_p_value - other._fixed_p_value);
+	Fixed	result;
+
+	result = this->_fixed_p_value - other._fixed_p_value;
+	return (result);
 }
 
-int		Fixed::operator*(const Fixed& other) const
+Fixed	Fixed::operator*(const Fixed& other) const
 {
-	return (this->_fixed_p_value * other._fixed_p_value);
+	Fixed	result;
+
+	result = (this->_fixed_p_value * other._fixed_p_value) / 256;
+	return (result);
 }
 
-int		Fixed::operator/(const Fixed& other) const
+Fixed	Fixed::operator/(const Fixed& other) const
 {
-	return (this->_fixed_p_value / other._fixed_p_value);
+	Fixed	result;
+
+	result = (this->_fixed_p_value * 256) / other._fixed_p_value;
+	return (result);
 }
 
 Fixed&	Fixed ::operator++(void)
@@ -138,6 +149,22 @@ Fixed	Fixed ::operator--(int)
 	return(tmp);
 }
 
+std::ostream	&operator<<(std::ostream &flux, const Fixed& fixed)
+{
+	flux << fixed.toFloat();
+	return (flux);
+}
+
+Fixed & Fixed::operator=(const Fixed& in_fixed) // <-- Assignement operator
+{
+	std::cout << "Copy assignment operator called" << std::endl;
+	if (this != &in_fixed)
+	{
+		this->_fixed_p_value = in_fixed._fixed_p_value;
+	}
+	return (*this);
+}
+
 /*===Others===*/
 float	Fixed::toFloat(void)const
 {
@@ -165,14 +192,14 @@ const Fixed&	Fixed::min(const Fixed & to_comp1, const Fixed & to_comp2)
 
 Fixed & Fixed::max(Fixed & to_comp1, Fixed & to_comp2)
 {
-	if (to_comp1._fixed_p_value < to_comp2._fixed_p_value)
+	if (to_comp1._fixed_p_value > to_comp2._fixed_p_value)
 		return (to_comp1);
 	return (to_comp2);
 }
 
 Fixed const & Fixed::max(const Fixed & to_comp1, const Fixed & to_comp2)
 {
-	if (to_comp1._fixed_p_value < to_comp2._fixed_p_value)
+	if (to_comp1._fixed_p_value > to_comp2._fixed_p_value)
 		return (to_comp1);
 	return (to_comp2);
 }
