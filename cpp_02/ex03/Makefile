@@ -8,7 +8,7 @@ SRCS_MAIN = main.cpp
 SRCDIR = srcs
 
 SRCS_FILES = $(addprefix $(SRCDIR)/, \
-	Fixed.cpp)
+	Fixed.cpp Point.cpp bsp.cpp)
 
 # Source files
 SRCS = $(SRCS_MAIN) $(SRCS_FILES)

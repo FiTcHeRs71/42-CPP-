@@ -52,4 +52,4 @@ class Fixed
 
 std::ostream				&operator<<(std::ostream &flux, const Fixed& fixed);
 
-#endif
+#endif /*__FIXED_HPP__*/

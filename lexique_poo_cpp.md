@@ -177,6 +177,109 @@ C'est pour ça qu'on met les attributs en `private` et qu'on fournit des **gette
 
 ---
 
+## 🛡️ Les deux `const` dans une signature de méthode
+
+Une signature comme celle-ci contient **deux `const` indépendants** qui protègent **deux choses différentes** :
+
+```cpp
+bool Animal::operator<(Animal const & input) const
+//                     ↑                    ↑
+//                  const #1            const #2
+```
+
+### Const #1 : `const` sur le paramètre — protège l'opérande de droite
+
+```cpp
+Animal const & input    // équivalent à : const Animal& input
+```
+
+Ce `const` dit : *"`input` est une référence à un `Animal`, et je promets de **ne pas modifier** ce `Animal` à travers cette référence."*
+
+**Pourquoi c'est nécessaire ?** Quand tu écris `a < b`, l'opérande de droite (`b`) est passé en paramètre sous le nom `input`. Tu ne veux pas que comparer modifie `b` — sinon ce serait absurde !
+
+C'est aussi un **contrat** : tu garantis aux utilisateurs que la comparaison ne modifie pas leur objet.
+
+**Note de syntaxe** : `Animal const&` et `const Animal&` sont **strictement équivalents**. Question de style.
+
+### Const #2 : `const` à la fin — protège l'opérande de gauche (`this`)
+
+```cpp
+bool Animal::operator<(Animal const & input) const
+//                                          ↑
+//                                    ce const-ci
+```
+
+Ce `const`, qu'on appelle **"const de méthode"** ou **"trailing const"**, dit : *"cette méthode promet de **ne pas modifier** l'objet sur lequel elle est appelée (c'est-à-dire `*this`)."*
+
+**Pourquoi c'est crucial ?** Sans ce `const`, ta méthode **ne peut pas être appelée sur un objet `const`** :
+
+```cpp
+Animal const rex("Rex", 5);
+Animal milo("Milo", 3);
+if (milo < rex) { ... }   // ❌ ERREUR si operator< n'a pas le const final
+                          //    (rex est const, le compilateur refuse)
+```
+
+Le compilateur refuse d'appeler une méthode non-const sur un objet const, parce qu'il ne peut pas garantir qu'elle ne modifierait pas l'objet.
+
+### Récapitulatif des deux const
+
+```cpp
+bool Animal::operator<(Animal const & input) const
+//                     └────┬───────┘        └─┬─┘
+//                          │                  │
+//                  const sur le param    const de méthode
+//                          │                  │
+//                  protège l'opérande     protège l'opérande
+//                  de DROITE (input)      de GAUCHE (this)
+```
+
+| Const | Protège | Empêche | Permet de... |
+|---|---|---|---|
+| `const` sur le paramètre | L'opérande de droite (`input`) | De modifier `input` dans le corps | Accepter des arguments const |
+| `const` à la fin | L'opérande de gauche (`this`) | De modifier `this` dans le corps | Appeler la méthode sur un objet const |
+
+### 🧠 Métaphore pour mémoriser
+
+Imagine que tu compares deux livres pour savoir lequel est le plus épais.
+
+- **Const sur le paramètre** : *"Je promets de ne pas écorner le livre que tu me passes en main droite."*
+- **Const de méthode** : *"Je promets de ne pas écorner le livre que je tiens dans ma main gauche (`this`) non plus."*
+
+Les deux mains sont protégées. Tu peux donc comparer même des **livres précieux** (des objets `const`) sans que la bibliothécaire t'arrête.
+
+### 🔍 Règle pratique : quand mettre le `const` final ?
+
+| Type de méthode | `const` final ? | Exemples |
+|---|---|---|
+| **Getters / lecture seule** | ✅ Oui | `getName() const`, `toFloat() const` |
+| **Comparaisons** | ✅ Oui | `operator< const`, `operator== const` |
+| **Opérateurs arithmétiques** | ✅ Oui | `operator+ const`, `operator- const` (créent un nouvel objet, ne modifient pas) |
+| **Méthodes d'affichage** | ✅ Oui | `print() const`, `display() const` |
+| **Setters** | ❌ Non | `setName(string)`, `setAge(int)` |
+| **Opérateurs modifiants** | ❌ Non | `operator++`, `operator+=`, `operator=` |
+| **Constructeurs / Destructeur** | ❌ Non | (créent ou détruisent l'objet) |
+
+**Règle simple** : si la méthode **ne modifie pas** l'état de l'objet, mets `const`. Sinon, ne le mets pas.
+
+### ⚠️ Le piège classique des opérateurs arithmétiques
+
+Pour bien fixer la nuance :
+
+```cpp
+// Opérateur d'addition : crée un NOUVEL objet, ne modifie ni a ni b
+Animal Animal::operator+(const Animal& other) const;   // ← const à la fin
+
+// Opérateur d'incrément : modifie this (l'incrémente)
+Animal& Animal::operator++(void);                       // ← PAS de const à la fin
+```
+
+`a + b` ne modifie **ni `a` ni `b`** — il retourne un troisième objet qui est leur somme. Donc `const` final.
+
+`++a` modifie **`a`**. Donc pas de `const` final.
+
+---
+
 ## 🏗️ Constructeur (*constructor*)
 
 Une **fonction membre spéciale** qui est appelée **automatiquement** quand un objet est instancié. Son rôle : **initialiser** l'objet.
@@ -233,6 +336,138 @@ Cette phrase t'évite la confusion avec `operator=` (*"je change pour devenir co
 
 ---
 
+## 🎯 Liste d'initialisation (*member initializer list*)
+
+La **liste d'initialisation** est la syntaxe avec `:` après la signature du constructeur, qui permet d'**initialiser directement** les attributs au lieu de les **assigner** dans le corps.
+
+```cpp
+// Avec liste d'initialisation (recommandé)
+Animal::Animal(std::string name, int age) : _name(name), _age(age)
+{
+    std::cout << "Animal constructor called" << std::endl;
+}
+
+// Sans liste d'initialisation (sub-optimal)
+Animal::Animal(std::string name, int age)
+{
+    this->_name = name;   // assignation, pas initialisation
+    this->_age = age;
+    std::cout << "Animal constructor called" << std::endl;
+}
+```
+
+### 🔬 Différence fondamentale : initialisation vs assignation
+
+Les deux versions semblent équivalentes, mais le mécanisme sous-jacent est **différent** :
+
+#### Sans liste d'init (assignation dans le corps)
+1. **Étape 1** : tous les attributs sont d'abord initialisés avec leur **constructeur par défaut** (ou laissés avec une valeur indéterminée pour les types primitifs comme `int`).
+2. **Étape 2** : dans le corps `{ ... }`, l'opérateur d'**assignation** (`operator=`) écrase la valeur initiale.
+
+→ **Deux étapes**, donc plus coûteux.
+
+#### Avec liste d'init (initialisation directe)
+1. **Étape unique** : les attributs sont **directement initialisés** avec la valeur souhaitée, via leur **constructeur de copie** (ou de conversion).
+
+→ **Une seule étape**, plus efficace.
+
+### ⚠️ Cas où la liste d'init est OBLIGATOIRE
+
+Pour certains types d'attributs, la liste d'initialisation n'est **pas un choix** — c'est la **seule façon** qui compile.
+
+#### Cas 1 : Attributs `const`
+
+```cpp
+class Animal {
+private:
+    const std::string _species;   // const !
+};
+
+// ❌ ERREUR : on ne peut pas assigner à un const
+Animal::Animal(std::string s) { this->_species = s; }
+
+// ✅ OK : initialisation directe via la liste
+Animal::Animal(std::string s) : _species(s) {}
+```
+
+Un `const` ne peut être fixé **qu'à sa naissance**. Une fois né, plus de modification possible. Donc seule l'initialisation directe fonctionne.
+
+#### Cas 2 : Attributs de type référence
+
+```cpp
+class Animal {
+private:
+    Owner& _owner;   // référence !
+};
+```
+
+Une référence **doit** être liée à sa cible dès sa naissance. Pas d'assignation possible.
+
+#### Cas 3 : Attributs sans constructeur par défaut
+
+Si un attribut est un objet d'une classe qui n'a **pas** de constructeur par défaut, il **ne peut pas** être initialisé par défaut à l'étape 1. Il **doit** être initialisé directement via la liste.
+
+### 📊 Tableau comparatif
+
+| | Assignation dans le corps | Liste d'initialisation |
+|---|---|---|
+| **Étapes** | 2 (init défaut + assignation) | 1 (init directe) |
+| **Performance** | Plus lent (surtout pour objets complexes) | Plus rapide |
+| **Pour les `int`** | Fonctionne mais sub-optimal | Idiomatique |
+| **Pour les `const`** | ❌ Ne compile pas | ✅ Seule façon |
+| **Pour les références** | ❌ Ne compile pas | ✅ Seule façon |
+| **Pour les objets sans ctor par défaut** | ❌ Ne compile pas | ✅ Seule façon |
+
+### 🎨 Bonne pratique de mise en forme
+
+Pour plusieurs attributs, on les met sur des lignes séparées pour la lisibilité :
+
+```cpp
+Animal::Animal(std::string name, int age, std::string species)
+    : _name(name)
+    , _age(age)
+    , _species(species)
+{
+    std::cout << "Animal constructor called" << std::endl;
+}
+```
+
+Note les `,` en début de ligne — style qui rend l'ajout/suppression d'attributs plus simple sans casser la syntaxe.
+
+### ⚠️ Subtilité importante : l'ordre d'initialisation
+
+Dans la liste, **l'ordre d'initialisation est dicté par l'ordre de DÉCLARATION dans la classe**, pas par l'ordre dans la liste !
+
+```cpp
+class Animal {
+private:
+    int _age;        // déclaré en premier
+    int _ageMonths;  // déclaré en second
+public:
+    Animal(int age) : _ageMonths(age * 12), _age(age) { }
+    //                ↑                       ↑
+    //                écrit en 1er            écrit en 2e
+    //                MAIS initialisé en 2nd  MAIS initialisé en 1er
+};
+```
+
+**Piège** : si tu utilises `_age` pour calculer `_ageMonths` (genre `_ageMonths(_age * 12)`), tu utiliserais un `_age` **non initialisé**, parce que `_ageMonths` est déclaré avant.
+
+**Bonne pratique** : toujours mettre les attributs dans la liste d'init **dans le même ordre que dans la déclaration**, pour éviter les mauvaises surprises. Certains compilateurs (avec `-Wall`) te warning si tu ne respectes pas cet ordre.
+
+### 🎯 La règle d'or
+
+> **Préfère TOUJOURS la liste d'initialisation** pour initialiser tes attributs dans un constructeur. Réserve le corps `{ ... }` aux opérations qui ne sont pas des initialisations (afficher des messages, faire des vérifications, lancer des actions, etc.).
+
+C'est l'une des **règles d'or** du C++ moderne, martelée dans tous les manuels professionnels (Effective C++, Modern C++, etc.).
+
+### 🧠 Mnémotechnique
+
+> **"Initialise, ne réassigne pas."**  
+> Naître avec la bonne valeur > Naître avec une valeur poubelle puis se faire écraser.
+
+---
+
 ## ⚰️ Destructeur (*destructor*)
 
 Une **fonction membre spéciale** appelée **automatiquement** quand un objet meurt (sortie de scope, `delete`...). Son rôle : **nettoyer** ce que l'objet a alloué/ouvert (mémoire, fichiers, sockets).
@@ -272,6 +507,60 @@ int total = Animal::getPopulationCount();  // pas besoin d'avoir un Animal pour 
 ```
 
 **Métaphore** : si chaque animal a son propre nom (attribut normal), un **compteur global** de la population (attribut static) est partagé et accessible à tous, sans qu'il appartienne à un animal en particulier.
+
+### ⚠️ Piège #1 : `static` ne se met QUE dans la déclaration
+
+`static` doit apparaître **uniquement dans le `.hpp`** (déclaration), **pas dans le `.cpp`** (définition).
+
+```cpp
+// Animal.hpp
+class Animal {
+public:
+    static int getPopulationCount();   // ✅ static ici
+};
+
+// Animal.cpp
+int Animal::getPopulationCount()       // ✅ PAS de static ici
+{
+    return _populationCount;
+}
+
+// ❌ ERREUR si tu écris :
+static int Animal::getPopulationCount() { ... }   // erreur de compilation
+```
+
+C'est une bizarrerie historique : `static` dans le `.cpp` aurait un sens **complètement différent** (lié à la portée de fichier, héritage du C). Le compilateur t'arrête net.
+
+### ⚠️ Piège #2 : Erreur "call to non-static member function without an object argument"
+
+Si tu appelles une méthode avec `ClassName::method()` mais qu'elle n'est pas déclarée `static`, le compilateur te lance :
+
+```
+error: call to non-static member function without an object argument
+```
+
+**Diagnostic** : tu utilises la **syntaxe d'une méthode static** (`Animal::method()`) sur une **méthode normale**. Solution : ajouter `static` dans la déclaration en `.hpp`.
+
+### 🔍 Quand utiliser `static` ?
+
+| Situation | Static ? | Pourquoi |
+|---|---|---|
+| Compteur global de toutes les instances | ✅ | Appartient à la classe, pas à une instance |
+| Constante de classe (ex: nombre de bits, max value) | ✅ | Partagée, ne change pas par instance |
+| Méthode utilitaire qui ne dépend d'aucune instance (`min`, `max`, factory) | ✅ | Symétrie, pas d'objet "principal" |
+| Getter/setter d'un attribut d'instance | ❌ | A besoin de `this` pour accéder à l'attribut |
+| Méthode qui modifie l'état d'un objet | ❌ | A besoin de `this` |
+
+### 🎯 Récapitulatif des règles `static`
+
+| Aspect | Règle |
+|---|---|
+| **Où mettre `static`** | Uniquement dans la **déclaration** (`.hpp`) |
+| **Comment l'appeler** | `ClassName::method(...)` (sans objet) |
+| **Accès à `this`** | ❌ Aucun (pas d'objet appelant) |
+| **Accès aux attributs d'instance** | ❌ Pas direct (mais via les paramètres oui) |
+| **Accès aux membres static de la classe** | ✅ Oui |
+| **Initialisation d'un attribut `static const`** | Dans le `.cpp`, hors de toute fonction : `const int Animal::_x = 8;` |
 
 ---
 

@@ -38,8 +38,8 @@ class Fixed
 	Fixed &operator=(const Fixed &in_fixed);
 
 	/*===Getters & Setters===*/
-	int						getRawBits( void ) const;
-	void					setRawBits( int const raw );
+	int						getRawBits(void) const;
+	void					setRawBits(int const raw);
 
 	/*===Member Function===*/
 	float					toFloat(void)const;
