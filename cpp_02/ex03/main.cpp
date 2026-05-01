@@ -12,4 +12,6 @@ int	main(void)
 	std::cout << bsp(a, b, c, Point(0, 0))    << " (attendu 0, sommet)" << std::endl;
 	std::cout << bsp(a, b, c, Point(5, 0))    << " (attendu 0, bord)" << std::endl;
 	std::cout << bsp(a, b, c, Point(5, 5))    << " (attendu 0, hypoténuse)" << std::endl;
+
+	return (0);
 }

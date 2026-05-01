@@ -1,31 +1,29 @@
 
 #include "../includes/Fixed.hpp"
+#include <cmath>
 
 const int	Fixed::_fracto_bits = 8;
 
-Fixed::Fixed(void)
+Fixed::Fixed(void) : _fixed_p_value(0)
 {
 	std::cout << "Default constructor called" << std::endl;
 }
 
-Fixed::Fixed(const int value)
+Fixed::Fixed(const int value) : _fixed_p_value(value * (1 << _fracto_bits))
 {
 	std::cout << "Int constructor called" << std::endl;
-	this->_fixed_p_value = value * (1 << _fracto_bits);
 }
-Fixed::Fixed(const float value)
+Fixed::Fixed(const float value) : _fixed_p_value(roundf(value * (1 << _fracto_bits)))
 {
 	std::cout << "Float constructor called" << std::endl;
-	this->_fixed_p_value = value * (1 << _fracto_bits);
 }
 Fixed::~Fixed(void)
 {
 	std::cout << "Destructor called" << std::endl;
 }
-Fixed::Fixed(const Fixed& new_one)
+Fixed::Fixed(const Fixed& new_one) : _fixed_p_value(new_one._fixed_p_value)
 {
 	std::cout << "Copy constructor called" << std::endl;
-	this->_fixed_p_value = new_one._fixed_p_value;
 }
 std::ostream	&operator<<(std::ostream &flux, const Fixed& fixed)
 {

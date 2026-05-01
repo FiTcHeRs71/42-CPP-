@@ -7,27 +7,27 @@ const int	Fixed::_fracto_bits = 8;
 /*===Canonical Form===*/
 Fixed::Fixed(void) : _fixed_p_value(0)
 {
-	//std::cout << "Default constructor called" << std::endl;
+	std::cout << "Default constructor called" << std::endl;
 }
 
 Fixed::Fixed(const int value) : _fixed_p_value(value * (1 << _fracto_bits))
 {
-	//std::cout << "Int constructor called" << std::endl;
+	std::cout << "Int constructor called" << std::endl;
 }
 
 Fixed::Fixed(const float value) : _fixed_p_value(roundf(value * (1 << _fracto_bits)))
 {
-	//std::cout << "Float constructor called" << std::endl;
+	std::cout << "Float constructor called" << std::endl;
 }
 
 Fixed::~Fixed(void)
 {
-	//std::cout << "Destructor called" << std::endl;
+	std::cout << "Destructor called" << std::endl;
 }
 
 Fixed::Fixed(const Fixed& new_one) : _fixed_p_value(new_one._fixed_p_value)
 {
-	//std::cout << "Copy constructor called" << std::endl;
+	std::cout << "Copy constructor called" << std::endl;
 }
 
 
@@ -144,7 +144,7 @@ std::ostream	&operator<<(std::ostream &flux, const Fixed& fixed)
 
 Fixed & Fixed::operator=(const Fixed& in_fixed) // <-- Assignement operator
 {
-	//std::cout << "Copy assignment operator called" << std::endl;
+	std::cout << "Copy assignment operator called" << std::endl;
 	if (this != &in_fixed)
 	{
 		this->_fixed_p_value = in_fixed._fixed_p_value;
