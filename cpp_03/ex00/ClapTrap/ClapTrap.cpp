@@ -1,5 +1,6 @@
 
 #include "ClapTrap.hpp"
+#include <climits>
 #include <ostream>
 
 /*===Canonical Form===*/
@@ -90,8 +91,14 @@ void	ClapTrap::takeDamage(unsigned int amount)
 
 void	ClapTrap::beRepaired(unsigned int amount)
 {
-	if (this->_heatlh > 0)
+	if (this->_heatlh + 3 < INT_MAX)
 	{
-		
+		std::cout << this->_name << " have " << this->_heatlh << " HP and start healing himslef." << std::endl;
+		this->_heatlh += amount;
+		std::cout << "Ayo yoyo ! Ayo yoyo ! Wololo wololo wololo wololo " << std::endl << this->_name << " has finished healing and now has " << this->_heatlh << "HP" << std ::endl;
+	}
+	else
+	{
+		std::cout << this->_name << " already have max HP." <<std::endl;
 	}
 }

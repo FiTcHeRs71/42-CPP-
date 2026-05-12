@@ -14,5 +14,6 @@ int	main(void)
 	supp.takeDamage(bot.getAttackDamage());
 	bot.attack("test");
 	supp.takeDamage(bot.getAttackDamage());
+	supp.beRepaired(5);
 	return (0);
 }
