@@ -5,7 +5,7 @@
 
 int	main(void)
 {
-	SECTION("TEST CLAP TRAP");
+	/*SECTION("TEST CLAP TRAP");
 	{
 	ClapTrap	bot("Jinx");
 	ClapTrap	supp("Alistar");
@@ -20,5 +20,10 @@ int	main(void)
 	bot.attack("test");
 	supp.takeDamage(bot.getAttackDamage());
 	supp.beRepaired(5);
+	}*/
+	SECTION("TEST SCAV TRAP");
+	{
+		ScavTrap	mid;
+
 	}
 }

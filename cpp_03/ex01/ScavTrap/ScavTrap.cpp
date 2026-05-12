@@ -1,7 +1,7 @@
 #include "ScavTrap.hpp"
 
 /*===Canonical Form===*/
-ScavTrap::ScavTrap(void)
+ScavTrap::ScavTrap(void) : ClapTrap()
 {
 	std::cout << "ScavTrap Default constructor called" << std::endl;
 }
