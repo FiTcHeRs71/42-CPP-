@@ -21,7 +21,7 @@ ClapTrap::~ClapTrap(void)
 ClapTrap::ClapTrap(const ClapTrap& to_copy)
 	: _name(to_copy._name)
 	, _energPoints(10)
-	,_attackDamage(0)
+	, _attackDamage(0)
 	, _heatlh(10)
 {
 	std::cout << "ClapTrap copy constructor called" << std::endl;
@@ -30,7 +30,7 @@ ClapTrap::ClapTrap(const ClapTrap& to_copy)
 ClapTrap::ClapTrap(std::string name)
 	: _name(name)
 	, _energPoints(10)
-	,_attackDamage(0)
+	, _attackDamage(0)
 	, _heatlh(10)
 {
 	std::cout << "ClapTrap constructor called" << std::endl;
@@ -91,7 +91,7 @@ void	ClapTrap::takeDamage(unsigned int amount)
 
 void	ClapTrap::beRepaired(unsigned int amount)
 {
-	if (this->_heatlh + 3 < INT_MAX)
+	if (this->_heatlh + 3 <= INT_MAX)
 	{
 		std::cout << this->_name << " have " << this->_heatlh << " HP and start healing himslef." << std::endl;
 		this->_heatlh += amount;

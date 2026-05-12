@@ -902,6 +902,320 @@ Pour vérifier que tu maîtrises le vocabulaire, réponds à ces questions :
 
 ---
 
+## 🧬 Héritage (*inheritance*)
+
+L'**héritage** permet à une classe (**la fille**) de **récupérer** automatiquement tous les attributs et méthodes d'une autre classe (**la mère** ou **la parente**), et de les **étendre** ou **modifier**.
+
+C'est le **2ème pilier** de la POO après l'encapsulation.
+
+### 🎯 Le problème que ça résout
+
+Sans héritage, modéliser plusieurs types similaires (Chien, Chat, Poisson) entraîne une **duplication massive** : mêmes attributs (`_name`, `_age`), mêmes méthodes (`eat()`, `sleep()`) répétés dans chaque classe. Difficile à maintenir, source de bugs.
+
+Avec l'héritage, tu factorises le **code commun** dans une classe **parente**, et chaque classe fille **n'ajoute que ce qui lui est spécifique**.
+
+### 📐 Syntaxe de base
+
+```cpp
+class Animal {                  // classe PARENTE (mère / base)
+protected:
+    std::string _name;
+public:
+    Animal(std::string name);
+    void eat();
+    void sleep();
+};
+
+class Dog : public Animal {     // Dog HÉRITE d'Animal
+//          ↑↑↑↑↑↑↑↑↑↑↑↑
+public:
+    Dog(std::string name);
+    void bark();                // méthode SPÉCIFIQUE à Dog
+};
+```
+
+Maintenant `Dog` possède **automatiquement** `_name`, `eat()`, `sleep()` en plus de ses propres méthodes. Pas besoin de les réécrire.
+
+```cpp
+Dog rex("Rex");
+rex.eat();    // méthode héritée d'Animal
+rex.sleep();  // méthode héritée d'Animal
+rex.bark();   // méthode propre à Dog
+```
+
+### 🔑 La relation **"est-un"** (*is-a*)
+
+L'héritage modélise une relation **"est-un"** :
+
+- Un `Dog` **est un** `Animal` ✅
+- Un `Cat` **est un** `Animal` ✅
+- Un `Pneu` **est-il un** `Voiture` ? ❌ Non, une `Voiture` **a un** `Pneu` → composition, pas héritage.
+
+**Test mental** : si tu ne peux pas dire *"X est un Y"* avec un sens naturel, n'utilise PAS l'héritage. Utilise la **composition** à la place (un attribut de type Y dans la classe X).
+
+### 🌳 La hiérarchie en arbre
+
+L'héritage crée une hiérarchie :
+
+```
+                    Animal
+                   /      \
+                Dog        Cat
+               /    \
+        Bulldog    Poodle
+```
+
+Plus on **descend**, plus on est **spécifique** (spécialisation).  
+Plus on **monte**, plus on est **général** (généralisation).
+
+Par transitivité : un `Bulldog` est un `Dog`, qui est un `Animal`. Donc un `Bulldog` est aussi un `Animal`.
+
+### 🛡️ `protected` prend tout son sens
+
+Avec l'héritage, le mot-clé `protected` (qu'on avait mentionné) prend toute son utilité :
+
+| Visibilité | Accès depuis la classe ? | Accès depuis une fille ? | Accès depuis l'extérieur ? |
+|---|---|---|---|
+| **`private`** | ✅ | ❌ | ❌ |
+| **`protected`** | ✅ | ✅ | ❌ |
+| **`public`** | ✅ | ✅ | ✅ |
+
+**`protected`** = *"privé pour le monde extérieur, mais accessible pour ma descendance."*
+
+**Règle pratique** :
+- Si un attribut sera **manipulé par les classes filles** → `protected`
+- Si un attribut est **strictement interne** à la classe parente → `private`
+
+### 🎭 Les 3 modes d'héritage
+
+Tu peux hériter de trois façons :
+
+```cpp
+class Dog : public Animal { };      // héritage public (le plus courant)
+class Dog : protected Animal { };   // héritage protégé (rare)
+class Dog : private Animal { };     // héritage privé (rare)
+```
+
+Effet du mode d'héritage sur les membres publics de la classe parente :
+
+| Mode d'héritage | Les membres `public` deviennent... |
+|---|---|
+| `public` | `public` (inchangé) |
+| `protected` | `protected` |
+| `private` | `private` |
+
+Le mode d'héritage **dégrade** la visibilité, jamais ne la rehausse.
+
+**En pratique : utilise toujours `public`.** C'est ce que 99% des cas exigent et c'est ce que CPP03 attend.
+
+### 🏗️ Constructeurs et héritage
+
+Point **fondamental** : quand tu crées un `Dog`, **deux constructeurs** sont appelés, dans un ordre précis.
+
+#### Ordre de construction
+
+```cpp
+Dog rex("Rex");
+```
+
+1. **D'abord** : le constructeur d'`Animal` (la partie parente)
+2. **Ensuite** : le constructeur de `Dog` (la partie fille)
+
+C'est logique : avant de pouvoir construire la partie "Dog" spécifique, il faut d'abord construire la partie "Animal" sous-jacente. On construit **du général au spécifique**.
+
+#### Appeler explicitement le constructeur parent
+
+Si le parent n'a pas de constructeur par défaut (par exemple, il prend des arguments obligatoires), tu **dois** appeler son constructeur explicitement dans la liste d'initialisation :
+
+```cpp
+Dog::Dog(std::string name) : Animal(name)
+//                           ↑↑↑↑↑↑↑↑↑↑↑↑
+//                  appel du constructeur parent
+{
+    std::cout << "Dog constructor called" << std::endl;
+}
+```
+
+Si tu oublies, le compilateur essaie d'appeler le constructeur par défaut d'`Animal`. S'il n'existe pas → erreur de compilation.
+
+### ⚰️ Destructeurs et héritage
+
+Pareil mais **dans l'ordre INVERSE** :
+
+```cpp
+~Dog();
+```
+
+1. **D'abord** : le destructeur de `Dog` (la partie spécifique)
+2. **Ensuite** : le destructeur d'`Animal` (la partie générale)
+
+C'est comme démonter une poupée russe : on enlève d'abord la coque extérieure pour accéder à l'intérieur.
+
+**Vue d'ensemble** :
+
+```
+Construction :  Animal → Dog        (général → spécifique)
+Destruction  :  Dog → Animal        (spécifique → général)
+```
+
+### ⚠️ Règle d'or : destructeurs `virtual`
+
+> **Si une classe est destinée à être héritée, son destructeur DOIT être `virtual`.**
+
+```cpp
+class Animal {
+public:
+    virtual ~Animal();   // ← virtual !
+};
+```
+
+Sans `virtual`, lors d'une destruction polymorphique (via un pointeur `Animal*` vers un `Dog`), le destructeur de `Dog` **ne sera pas appelé** → fuite mémoire, ressources non libérées.
+
+Le détail du pourquoi est dans le pilier **polymorphisme** (CPP04), mais retiens **dès maintenant** : destructeur de classe parente = toujours `virtual`.
+
+### 🎬 Exemple complet
+
+```cpp
+// Animal.hpp
+class Animal {
+protected:
+    std::string _name;
+public:
+    Animal(std::string name);
+    virtual ~Animal();
+    void eat();
+};
+
+// Animal.cpp
+Animal::Animal(std::string name) : _name(name) {
+    std::cout << "Animal constructor called" << std::endl;
+}
+Animal::~Animal() {
+    std::cout << "Animal destructor called" << std::endl;
+}
+void Animal::eat() {
+    std::cout << _name << " is eating." << std::endl;
+}
+
+// Dog.hpp
+class Dog : public Animal {
+public:
+    Dog(std::string name);
+    ~Dog();
+    void bark();
+};
+
+// Dog.cpp
+Dog::Dog(std::string name) : Animal(name) {
+    std::cout << "Dog constructor called" << std::endl;
+}
+Dog::~Dog() {
+    std::cout << "Dog destructor called" << std::endl;
+}
+void Dog::bark() {
+    std::cout << _name << " says: Woof!" << std::endl;
+}
+
+// main.cpp
+int main() {
+    Dog rex("Rex");
+    rex.eat();
+    rex.bark();
+    return 0;
+}
+```
+
+**Sortie** :
+```
+Animal constructor called    ← parent d'abord
+Dog constructor called       ← puis fille
+Rex is eating.
+Rex says: Woof!
+Dog destructor called        ← fille d'abord
+Animal destructor called     ← puis parent
+```
+
+### 🆚 Héritage vs Composition
+
+Ne pas confondre :
+
+| Héritage ("est-un") | Composition ("a-un") |
+|---|---|
+| `Dog` **est un** `Animal` | `Car` **a un** `Engine` |
+| `class Dog : public Animal` | `class Car { Engine _engine; };` |
+| Lien fort, dépendance forte | Lien faible, les classes restent indépendantes |
+| Hérite de TOUT (attrs + méthodes) | Utilise juste un objet à l'intérieur |
+| Visibilité contrôlée par `protected` | Pas d'impact sur la visibilité |
+
+**Règle d'or moderne** : *"Préfère la composition à l'héritage quand tu as le choix."*
+
+L'héritage est puissant mais crée des **couplages forts** entre classes. La composition reste plus flexible. Ne hérite que quand la relation **"est-un"** est claire et naturelle.
+
+### 🚨 L'héritage en diamant
+
+Cas particulier qu'on rencontre au CPP03 : une classe hérite de **deux classes parentes** qui héritent elles-mêmes d'une **classe commune** :
+
+```
+         Animal
+         /    \
+       Dog    Robot
+         \    /
+       RobotDog   ← double héritage !
+```
+
+Sans précaution, `RobotDog` contient **deux exemplaires** d'`Animal` (un via `Dog`, un via `Robot`). Ambigüité dangereuse !
+
+**Solution** : le mot-clé `virtual` dans la déclaration d'héritage :
+
+```cpp
+class Dog : virtual public Animal { };     // ← virtual !
+class Robot : virtual public Animal { };   // ← virtual !
+class RobotDog : public Dog, public Robot { };
+```
+
+Le `virtual` ici n'a rien à voir avec celui des méthodes/destructeurs. Il dit : *"il n'existe qu'**un seul** `Animal` dans `RobotDog`, partagé entre `Dog` et `Robot`."* C'est ce qu'on appelle l'**héritage virtuel**.
+
+C'est exactement le sujet de l'**ex03 du CPP03** (la classe `DiamondTrap`).
+
+### 🎨 Métaphore pour mémoriser
+
+Pense à l'héritage comme à un **héritage familial** :
+
+- Tes **parents** te transmettent des caractéristiques (couleur des yeux, taille, certains traits).
+- Tu en **hérites** automatiquement.
+- Tu as aussi tes **propres caractéristiques** que tes parents n'avaient pas.
+- Tu peux **redéfinir** certaines choses (musique préférée différente).
+- Ton existence dépend de celle de tes parents : tu n'aurais pas pu exister sans eux.
+
+C'est exactement la POO : la classe fille hérite, enrichit, peut redéfinir, mais reste fondamentalement liée à sa classe parente.
+
+### 🎯 Aperçu de ce qui vient au CPP04 : le polymorphisme
+
+L'héritage seul est utile, mais il révèle son plein potentiel avec le **polymorphisme** (CPP04). Spoiler :
+
+```cpp
+Animal* tab[3];
+tab[0] = new Dog("Rex");
+tab[1] = new Cat("Whiskers");
+tab[2] = new Bird("Tweety");
+
+for (int i = 0; i < 3; i++)
+    tab[i]->makeSound();   // chaque animal fait SON propre son !
+```
+
+Un seul appel `makeSound()` produit des **comportements différents** selon le **vrai type** de l'objet. C'est la magie du polymorphisme, et c'est ce qu'on couvrira au CPP04.
+
+### 🧠 Mnémotechniques pour l'héritage
+
+- **"Est-un"** pour décider quand hériter
+- **`protected`** pour partager avec les enfants
+- **Constructeurs : parent → enfant** (du général au spécifique)
+- **Destructeurs : enfant → parent** (l'inverse)
+- **Destructeur parent toujours `virtual`** si la classe sera héritée
+- **Préfère la composition à l'héritage** quand tu as le choix
+
+---
+
 ## 📚 Termes complémentaires à connaître
 
 | Terme | Définition rapide |

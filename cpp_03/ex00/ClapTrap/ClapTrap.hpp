@@ -19,7 +19,7 @@ class	ClapTrap
 	ClapTrap(void);
 	~ClapTrap(void);
 	ClapTrap(const ClapTrap& to_copy);
-	ClapTrap &operator=(const ClapTrap&);
+	ClapTrap &operator=(const ClapTrap& to_copy);
 	ClapTrap(std::string name);
 
 	/*===Getters & Setters===*/
