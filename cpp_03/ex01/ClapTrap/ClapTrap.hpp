@@ -23,7 +23,7 @@ class	ClapTrap
 	ClapTrap(std::string name);
 
 	/*===Getters & Setters===*/
-	int			getAttackDamage(void);
+	int			getAttackDamage(void)const;
 	void		setAttackDamage(int damage_amount);
 
 	/*===Member Function===*/

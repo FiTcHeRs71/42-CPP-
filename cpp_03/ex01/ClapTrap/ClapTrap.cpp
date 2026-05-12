@@ -47,7 +47,7 @@ ClapTrap & ClapTrap::operator=(const ClapTrap& ClapTrap)
 }
 
 /*===Getters & Setters===*/
-int	ClapTrap::getAttackDamage(void)
+int	ClapTrap::getAttackDamage(void)const
 {
 	return (this->_attackDamage);
 }
