@@ -22,6 +22,10 @@ class	ClapTrap
 	ClapTrap &operator=(const ClapTrap&);
 	ClapTrap(std::string name);
 
+	/*===Getters & Setters===*/
+	int			getAttackDamage(void);
+	void		setAttackDamage(int damage_amount);
+
 	/*===Member Function===*/
 	void		attack(const std::string& target);
 	void		takeDamage(unsigned int amount);
