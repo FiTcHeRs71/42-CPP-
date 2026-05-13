@@ -23,7 +23,12 @@ int	main(void)
 	}*/
 	SECTION("TEST SCAV TRAP");
 	{
-		ScavTrap	mid;
+		ScavTrap	top;
+		ScavTrap	mid("Akali");
+		ScavTrap	jung = mid;
 
+		mid.attack("test");
+		jung.attack("test");
+		top.takeDamage(20);
 	}
 }

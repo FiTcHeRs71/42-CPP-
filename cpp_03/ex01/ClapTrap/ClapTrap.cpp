@@ -20,9 +20,9 @@ ClapTrap::~ClapTrap(void)
 
 ClapTrap::ClapTrap(const ClapTrap& to_copy)
 	: _name(to_copy._name)
-	, _energPoints(10)
-	,_attackDamage(0)
-	, _heatlh(10)
+	, _energPoints(to_copy._energPoints)
+	, _attackDamage(to_copy._attackDamage)
+	, _heatlh(to_copy._heatlh)
 {
 	std::cout << "ClapTrap copy constructor called" << std::endl;
 }
@@ -30,7 +30,7 @@ ClapTrap::ClapTrap(const ClapTrap& to_copy)
 ClapTrap::ClapTrap(std::string name)
 	: _name(name)
 	, _energPoints(10)
-	,_attackDamage(0)
+	, _attackDamage(0)
 	, _heatlh(10)
 {
 	std::cout << "ClapTrap constructor called" << std::endl;

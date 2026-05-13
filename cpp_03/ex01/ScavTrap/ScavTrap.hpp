@@ -13,6 +13,7 @@ class ScavTrap : public ClapTrap
 	~ScavTrap(void);
 	ScavTrap(const ScavTrap& ScavTrap);
 	ScavTrap &operator=(const ScavTrap & ScavTrap);
+	ScavTrap(std::string name);
 
 	/*===Member Function===*/
 	void	guardGate();

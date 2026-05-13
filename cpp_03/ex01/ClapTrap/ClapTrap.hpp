@@ -6,7 +6,7 @@
 
 class	ClapTrap
 {
-	private:
+	protected:
 
 	std::string	_name;
 	int			_energPoints;
@@ -17,7 +17,7 @@ class	ClapTrap
 
 	/*===Canonical Form===*/
 	ClapTrap(void);
-	~ClapTrap(void);
+	virtual ~ClapTrap(void);
 	ClapTrap(const ClapTrap& to_copy);
 	ClapTrap &operator=(const ClapTrap& to_copy);
 	ClapTrap(std::string name);
@@ -31,6 +31,5 @@ class	ClapTrap
 	void		takeDamage(unsigned int amount);
 	void		beRepaired(unsigned int amount);
 };
-
 
 #endif /*__CLAP_TRAP_HPP__*/
