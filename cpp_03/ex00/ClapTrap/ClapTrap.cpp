@@ -36,12 +36,12 @@ ClapTrap::ClapTrap(std::string name)
 	std::cout << "ClapTrap constructor called" << std::endl;
 }
 
-ClapTrap & ClapTrap::operator=(const ClapTrap& ClapTrap)
+ClapTrap & ClapTrap::operator=(const ClapTrap& src)
 {
 	std::cout << "ClapTrap assignement oprator called" << std::endl;
-	if (this != &ClapTrap)
+	if (this != &src)
 	{
-		this -> _name = ClapTrap._name;
+		this -> _name = src._name;
 	}
 	return (*this);
 }
