@@ -11,8 +11,8 @@ class ScavTrap : public ClapTrap
 	/*===Canonical Form===*/
 	ScavTrap(void);
 	~ScavTrap(void);
-	ScavTrap(const ScavTrap& ScavTrap);
-	ScavTrap &operator=(const ScavTrap & ScavTrap);
+	ScavTrap(const ScavTrap& to_copy);
+	ScavTrap &operator=(const ScavTrap & src);
 	ScavTrap(std::string name);
 
 	/*===Member Function===*/

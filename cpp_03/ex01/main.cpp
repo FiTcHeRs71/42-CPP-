@@ -5,30 +5,17 @@
 
 int	main(void)
 {
-	/*SECTION("TEST CLAP TRAP");
-	{
-	ClapTrap	bot("Jinx");
-	ClapTrap	supp("Alistar");
-
-	bot.attack("test");
-	supp.takeDamage(bot.getAttackDamage());
-	bot.setAttackDamage(5);
-	bot.attack("test");
-	supp.takeDamage(bot.getAttackDamage());
-	bot.attack("test");
-	supp.takeDamage(bot.getAttackDamage());
-	bot.attack("test");
-	supp.takeDamage(bot.getAttackDamage());
-	supp.beRepaired(5);
-	}*/
 	SECTION("TEST SCAV TRAP");
 	{
 		ScavTrap	top;
 		ScavTrap	mid("Akali");
-		ScavTrap	jung = mid;
 
-		mid.attack("test");
-		jung.attack("test");
+		mid.attack("Default");
+		top.takeDamage(20);
+		top.beRepaired(10);
+		top.guardGate();
+		mid.attack("Default");
 		top.takeDamage(20);
 	}
+	return (0);
 }
