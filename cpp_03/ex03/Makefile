@@ -25,8 +25,6 @@ SRCS_DIAM = $(addprefix $(DIAMTRAPDIR)/, \
 # Source files
 SRCS = $(SRCS_MAIN) $(SRCS_CLAP) $(SRCS_FRAG) $(SRCS_SCAV) $(SRCS_DIAM)
  
- 
- 
 # Object files
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
  

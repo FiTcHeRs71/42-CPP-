@@ -12,6 +12,8 @@ DiamondTrap::~DiamondTrap(void)
 }
 DiamondTrap::DiamondTrap(const DiamondTrap& to_copy)
 	: ClapTrap(to_copy)
+	, FragTrap(to_copy)
+	, ScavTrap(to_copy)
 {
 	std::cout << "DiamondTrap  copy constructor called" << std::endl;
 }
