@@ -20,6 +20,9 @@ class Animals
 	Animals(const Animals& to_copy);
 	Animals&operator=(const Animals& src);
 
+	/*===Other Constructor===*/
+	Animals(std::string type);
+
 	/*===Getters & Setters===*/
 	
 
