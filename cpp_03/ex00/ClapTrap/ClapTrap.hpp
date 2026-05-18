@@ -2,7 +2,7 @@
 # define __CLAP_TRAP_HPP__
 
 # include <iostream>
-#include <string>
+# include <string>
 
 class	ClapTrap
 {

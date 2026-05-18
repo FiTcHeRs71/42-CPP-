@@ -1,7 +1,9 @@
 #ifndef __DOG_HPP__
 # define __DOG_HPP__
 
-class Dog
+# include "../Animal/Animal.hpp"
+
+class Dog : public Animal
 {
 	private:
 	
@@ -21,7 +23,7 @@ class Dog
 	
 
 	/*===Member Function===*/
-	
+	virtual void	makeSound(void) const;
 };
 
 #endif
