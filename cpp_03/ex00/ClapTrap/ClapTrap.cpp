@@ -60,7 +60,7 @@ void	ClapTrap::setAttackDamage(int damage_amount)
 /*===Member Function===*/
 void	ClapTrap::attack(const std::string& target)
 {
-	if (this->_energPoints >= 3)
+	if (this->_energPoints >= 1)
 	{
 		std::cout << this->_name << " attack " << target << " causing " << this->_attackDamage << " damage and use 1 energy points, ";
 		this->_energPoints -= 1;
@@ -79,6 +79,8 @@ void	ClapTrap::takeDamage(unsigned int amount)
 	if (this->_heatlh > 0)
 	{
 		this->_heatlh -= amount;
+		if (this->_heatlh < 0)
+			this->_heatlh = 0;
 		std::cout << this->_name << " have recieve " << amount << " damage, " << this->_heatlh << " remaining." << std::endl;
 		if (this->_heatlh <= 0)
 			std::cout << this->_name << " DIED." << std::endl;

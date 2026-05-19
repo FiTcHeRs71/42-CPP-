@@ -31,14 +31,17 @@ DiamondTrap & DiamondTrap::operator=(const DiamondTrap& src)
 }
 
 DiamondTrap::DiamondTrap(std::string name)
-	: ClapTrap(name)
-	, _name(name + ClapTrap::_name)
+	: ClapTrap(name + "_clap_name")
+	, FragTrap(name)
+	, ScavTrap(name)
+	, _name(name)
 {
 	std::cout << "DiamondTrap constructor called" << std::endl;
 }
 
 /*===Member Function===*/
-void	DiamondTrap::whoAmI()
+void DiamondTrap::whoAmI()
 {
-	std::cout << "Hello dear friends my name is " << this->_name << std::endl;
+	std::cout << "Hello dear friends my name is " << this->_name
+	<< " and my ClapTrap name is " << ClapTrap::_name << std::endl;
 }
