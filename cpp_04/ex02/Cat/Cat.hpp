@@ -22,7 +22,7 @@ class Cat : public Animal
 	Cat&operator=(const Cat& src);
 
 	/*===Getters & Setters===*/
-	std::string		getMyBrainIdeas(int index)const;
+	std::string		getMyBrainIdeas(int index) const;
 
 	/*===Member Function===*/
 	virtual void	makeSound(void) const;

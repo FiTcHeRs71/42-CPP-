@@ -29,8 +29,15 @@ Dog & Dog::operator=(const Dog& src)
 	return (*this);
 }
 
+/*===Getters & Setters===*/
+std::string		Dog::getMyBrainIdeas(int index)const
+{
+	return (this->_myBrain->getIdeas(index));
+}
+
 /*===Member Function===*/
 void	Dog::makeSound(void) const
 {
 	std::cout << "*Woof Woof*" << std::endl;
 }
+

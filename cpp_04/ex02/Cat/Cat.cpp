@@ -35,6 +35,7 @@ std::string		Cat::getMyBrainIdeas(int index)const
 	return (this->_myBrain->getIdeas(index));
 }
 
+
 /*===Member Function===*/
 void	Cat::makeSound(void) const
 {

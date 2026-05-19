@@ -1,10 +1,10 @@
-#ifndef __CAT_HPP__
-# define __CAT_HPP__
+#ifndef __DOG_HPP__
+# define __DOG_HPP__
 
 # include "../Animal/Animal.hpp"
 # include "../Brain/Brain.hpp"
 
-class Cat : public Animal
+class Dog : public Animal
 {
 	private:
 
@@ -16,13 +16,13 @@ class Cat : public Animal
 	public:
 
 	/*===Canonical Form===*/
-	Cat(void);
-	~Cat(void);
-	Cat(const Cat& to_copy);
-	Cat&operator=(const Cat& src);
+	Dog(void);
+	~Dog(void);
+	Dog(const Dog& to_copy);
+	Dog&operator=(const Dog& src);
 
 	/*===Getters & Setters===*/
-	std::string		getMyBrainIdeas(int index)const;
+	std::string		getMyBrainIdeas(int index) const;
 
 	/*===Member Function===*/
 	virtual void	makeSound(void) const;
