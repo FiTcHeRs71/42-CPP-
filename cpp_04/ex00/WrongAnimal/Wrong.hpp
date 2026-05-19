@@ -2,6 +2,7 @@
 # define __WRONG_HPP__
 
 #include <iostream>
+#include <string>
 
 class WrongAnimal
 {
@@ -22,10 +23,10 @@ class WrongAnimal
 	WrongAnimal(std::string name);
 
 	/*===Getters & Setters===*/
-	void	makeSound(void);
+	std::string	getType(void)const;
 
 	/*===Member Function===*/
-	
+	void	makeSound(void);
 };
 
 class WrongCat : public WrongAnimal
@@ -49,7 +50,6 @@ class WrongCat : public WrongAnimal
 	
 
 	/*===Member Function===*/
-	void	makeSound(void);
 };
 
 #endif /*__WRONG_HPP__*/

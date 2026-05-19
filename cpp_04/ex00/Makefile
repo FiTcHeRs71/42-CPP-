@@ -8,6 +8,10 @@ SRCS_MAIN = main.cpp
 ANIDIR = Animal
 DOGDIR = Dog
 CATDIR = Cat
+WRONGDIR = WrongAnimal
+
+SRCS_WRONG = $(addprefix $(WRONGDIR)/, \
+	Wrong.cpp)
 
 SRCS_ANI = $(addprefix $(ANIDIR)/, \
 	Animal.cpp)
@@ -19,7 +23,7 @@ SRCS_DOG= $(addprefix $(DOGDIR)/, \
 	Dog.cpp)
 
 # Source files
-SRCS = $(SRCS_MAIN) $(SRCS_ANI) $(SRCS_CAT) $(SRCS_DOG)
+SRCS = $(SRCS_MAIN) $(SRCS_ANI) $(SRCS_CAT) $(SRCS_DOG) $(SRCS_WRONG)
  
 # Object files
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)

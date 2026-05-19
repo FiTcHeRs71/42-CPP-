@@ -8,7 +8,7 @@
 
 int	main(void)
 {
-	SECTION("POLYMORPH NORMAL");
+	SECTION("POLYMORPH NORMAL // INTRA TEST");
 	{
 		const Animal* meta = new Animal();
 		const Animal* j = new Dog();
@@ -17,7 +17,7 @@ int	main(void)
 		std::cout << j->getType() << " " << std::endl;
 		std::cout << i->getType() << " " << std::endl;
 
-		i->makeSound(); //will output the cat sound!
+		i->makeSound();
 		j->makeSound();
 		meta->makeSound();
 
@@ -27,10 +27,13 @@ int	main(void)
 	}
 	SECTION("WRONG ANIMAL");
 	{
-		const WrongAnimal meta = WrongAnimal();
-		const WrongAnimal cat = WrongCat();
+		//const WrongAnimal* meta = new WrongAnimal();
+		WrongAnimal* cat = new WrongCat();
 
-		meta.makeSound();
+		std::cout << cat->getType() << " " << std::endl;
+		cat->makeSound();
+
+		delete cat;
 	}
 	return (0);
 }

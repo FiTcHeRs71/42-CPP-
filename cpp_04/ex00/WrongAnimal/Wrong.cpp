@@ -26,6 +26,11 @@ WrongAnimal & WrongAnimal::operator=(const WrongAnimal& src)
 	return (*this);
 }
 
+std::string	WrongAnimal::getType(void)const
+{
+	return (this->_type);
+}
+
 void	WrongAnimal::makeSound(void)
 {
 	std::cout << "I'm a Wromg Animal" << std::endl;
@@ -43,6 +48,7 @@ WrongCat::~WrongCat(void)
 }
 
 WrongCat::WrongCat(const WrongCat& to_copy)
+	: WrongAnimal(to_copy)
 {
 	std::cout << "WrongCat copy constructor called" << std::endl;
 }
@@ -54,9 +60,4 @@ WrongCat & WrongCat::operator=(const WrongCat& src)
 		WrongAnimal::operator=(src);
 	}
 	return (*this);
-}
-
-void	WrongCat::makeSound(void)
-{
-	std::cout << "I'm a wrong cat" << std::endl;
 }
