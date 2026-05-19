@@ -8,7 +8,7 @@ ClapTrap::ClapTrap(void)
 	: _name("Default")
 	, _energPoints(10)
 	, _attackDamage(0)
-	, _heatlh(10)
+	, _health(10)
 {
 	std::cout << "ClapTrap Default constructor called" << std::endl;
 }
@@ -22,7 +22,7 @@ ClapTrap::ClapTrap(const ClapTrap& to_copy)
 	: _name(to_copy._name)
 	, _energPoints(10)
 	, _attackDamage(0)
-	, _heatlh(10)
+	, _health(10)
 {
 	std::cout << "ClapTrap copy constructor called" << std::endl;
 }
@@ -31,7 +31,7 @@ ClapTrap::ClapTrap(std::string name)
 	: _name(name)
 	, _energPoints(10)
 	, _attackDamage(0)
-	, _heatlh(10)
+	, _health(10)
 {
 	std::cout << "ClapTrap constructor called" << std::endl;
 }
@@ -68,7 +68,7 @@ void	ClapTrap::attack(const std::string& target)
 			this->_energPoints = 0;
 		std::cout << this->_energPoints << " energy points remaining" << std::endl;
 	}
-	else if (this->_energPoints < 3)
+	else if (this->_energPoints < 1)
 	{
 		std::cout << this->_name << " is not able to attack cause he have no energy (" << this->_energPoints << ")" << std::endl;
 	}
@@ -76,16 +76,17 @@ void	ClapTrap::attack(const std::string& target)
 
 void	ClapTrap::takeDamage(unsigned int amount)
 {
-	if (this->_heatlh > 0)
+	if (this->_health > 0)
 	{
-		this->_heatlh -= amount;
-		if (this->_heatlh < 0)
-			this->_heatlh = 0;
-		std::cout << this->_name << " have recieve " << amount << " damage, " << this->_heatlh << " remaining." << std::endl;
-		if (this->_heatlh <= 0)
-			std::cout << this->_name << " DIED." << std::endl;
+	if (amount >= (unsigned int)this->_health)
+		this->_health = 0;
+	else
+		this->_health -= amount;
+	std::cout << this->_name << " have recieve " << amount << " damage, " << this->_health << " remaining." << std::endl;
+	if (this->_health <= 0)
+		std::cout << this->_name << " DIED." << std::endl;
 	}
-	else if (this->_heatlh <= 0)
+	else if (this->_health <= 0)
 	{
 		std::cout << this->_name << "is already dead, stop harassing him" << std::endl;
 	}
@@ -93,11 +94,11 @@ void	ClapTrap::takeDamage(unsigned int amount)
 
 void	ClapTrap::beRepaired(unsigned int amount)
 {
-	if (this->_heatlh + amount <= INT_MAX)
+	if (this->_health + amount <= INT_MAX)
 	{
-		std::cout << this->_name << " have " << this->_heatlh << " HP and start healing himslef." << std::endl;
-		this->_heatlh += amount;
-		std::cout << "Ayo yoyo ! Ayo yoyo ! Wololo wololo wololo wololo " << std::endl << this->_name << " has finished healing and now has " << this->_heatlh << "HP" << std ::endl;
+		std::cout << this->_name << " have " << this->_health << " HP and start healing himslef." << std::endl;
+		this->_health += amount;
+		std::cout << "Ayo yoyo ! Ayo yoyo ! Wololo wololo wololo wololo " << std::endl << this->_name << " has finished healing and now has " << this->_health << "HP" << std ::endl;
 	}
 	else
 	{

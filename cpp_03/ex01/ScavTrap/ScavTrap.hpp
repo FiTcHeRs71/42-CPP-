@@ -17,7 +17,7 @@ class ScavTrap : public ClapTrap
 
 	/*===Member Function===*/
 	void	guardGate();
-
+	void	attack(const std::string& target);
 };
 
 #endif /*__SCAV_TRAP__*/

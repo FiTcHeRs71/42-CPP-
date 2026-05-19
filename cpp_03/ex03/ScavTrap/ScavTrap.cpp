@@ -5,7 +5,7 @@ ScavTrap::ScavTrap(void)
 	: ClapTrap()
 {
 	std::cout << "ScavTrap default constructor called" << std::endl;
-	this->_heatlh = 100;
+	this->_health = 100;
 	this->_energPoints = 50;
 	this->_attackDamage = 20;
 }
@@ -29,7 +29,7 @@ ScavTrap & ScavTrap::operator=(const ScavTrap & src)
 		this->_name = src._name;
 		this->_attackDamage = src._attackDamage;
 		this->_energPoints = src._energPoints;
-		this->_heatlh = src._heatlh;
+		this->_health = src._health;
 	}
 	return (*this);
 }
@@ -38,7 +38,7 @@ ScavTrap::ScavTrap(std::string name)
 	: ClapTrap(name)
 {
 	std::cout << "ScavTrap constructor called." << std::endl;
-	this->_heatlh = 100;
+	this->_health = 100;
 	this->_energPoints = 50;
 	this->_attackDamage = 20;
 }
@@ -46,6 +46,6 @@ ScavTrap::ScavTrap(std::string name)
 void	ScavTrap::guardGate()
 {
 	std::cout << this->_name << " switch in Gate keeper mode and increase his hp." << std::endl;
-	this->_heatlh += 50;
+	this->_health += 50;
 	std::cout << this->_name << " : You shall not pass" << std::endl;
 }
