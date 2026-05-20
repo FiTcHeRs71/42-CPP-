@@ -57,10 +57,16 @@
 25. [`operator=` et constructeur de copie avec héritage](#-operator-et-constructeur-de-copie-avec-héritage)
 26. [Héritage en diamant](#-lhéritage-en-diamant)
 
+**Polymorphisme et abstraction (CPP04)**
+27. [Polymorphisme (de sous-type)](#-polymorphisme-de-sous-type)
+28. [Fonction virtuelle pure et classe abstraite](#-fonction-virtuelle-pure-et-classe-abstraite)
+29. [Interface (classe abstraite pure)](#-interface-classe-abstraite-pure)
+30. [L'idiome clone() et la copie profonde polymorphique](#-lidiome-clone-et-la-copie-profonde-polymorphique)
+
 **Annexes**
-27. [Récap visuel](#-récap-visuel)
-28. [Termes complémentaires](#-termes-complémentaires-à-connaître)
-29. [Quiz d'auto-évaluation](#-quiz-dauto-évaluation)
+31. [Récap visuel](#-récap-visuel)
+32. [Termes complémentaires](#-termes-complémentaires-à-connaître)
+33. [Quiz d'auto-évaluation](#-quiz-dauto-évaluation)
 
 ---
 
@@ -1858,6 +1864,177 @@ Le sujet exige que `DiamondTrap` ait un nom **propre** (`_name`) distinct du nom
 
 ---
 
+## 🎭 Polymorphisme (de sous-type)
+
+📘 **Définition** : le **polymorphisme** (de sous-type, ou *dynamic polymorphism*) est la capacité d'appeler une méthode **via un pointeur/référence de la classe de base**, et que ce soit la version **de la classe réelle de l'objet** qui s'exécute — décidée **à l'exécution**, pas à la compilation.
+
+C'est le 3ᵉ pilier de la POO, au cœur du CPP04.
+
+```cpp
+AMateria* m = new Ice();   // type statique : AMateria* | type dynamique : Ice
+m->use(target);            // appelle Ice::use, PAS AMateria::use
+```
+
+### 🔑 Le mot-clé `virtual` — la liaison dynamique
+
+Sans `virtual`, C++ choisit la méthode selon le **type du pointeur** (liaison statique). Avec `virtual`, il choisit selon le **type réel de l'objet pointé** (liaison dynamique).
+
+```cpp
+class AMateria {
+public:
+    virtual void use(ICharacter& t);   // virtual → liaison dynamique
+};
+class Ice : public AMateria {
+public:
+    void use(ICharacter& t);           // redéfinit (override) la version de base
+};
+```
+
+🎨 **Métaphore** : tu demandes à « un animal » de faire son cri (`makeSound()`). Tu ne sais pas lequel c'est, mais chacun répond à sa façon : le chien aboie, le chat miaule. Tu parles à l'**abstraction** (Animal), l'objet répond selon sa **vraie nature**.
+
+🧠 **Mnémotechnique** : *« `virtual` = l'objet décide, pas le pointeur. »*
+
+### ⚙️ Comment ça marche (la *vtable*)
+
+Une classe avec des méthodes `virtual` possède une **table de fonctions virtuelles** (*vtable*). Chaque objet garde un pointeur caché vers cette table. À l'appel d'une méthode virtuelle, le programme passe par la vtable pour trouver la bonne fonction → coût minime, décidé à l'exécution.
+
+### ⚠️ Pièges classiques
+
+- **Oublier `virtual`** → tu appelles la version de la base (bug silencieux, typique de l'exo *WrongAnimal*).
+- **Polymorphisme par valeur** → impossible : il faut un **pointeur ou une référence** de la base. Une copie par valeur provoque du *slicing* (voir section héritage).
+- **Destructeur non `virtual`** sur une base manipulée en polymorphisme → fuite mémoire (voir [Destructeur](#-destructeur-destructor)).
+
+---
+
+## 🧩 Fonction virtuelle pure et classe abstraite
+
+📘 **Fonction virtuelle pure** : une méthode `virtual` déclarée `= 0`, **sans implémentation obligatoire** dans la classe qui la déclare. Elle impose aux classes filles de la définir.
+
+```cpp
+virtual AMateria* clone() const = 0;   // = 0 → virtuelle PURE
+```
+
+📘 **Classe abstraite** : une classe qui contient **au moins une** méthode virtuelle pure. Conséquence directe : **on ne peut pas l'instancier**.
+
+```cpp
+AMateria m;            // ❌ ERREUR : AMateria est abstraite
+AMateria* p = new Ice; // ✅ OK : Ice est concrète (elle définit clone())
+```
+
+🎨 **Métaphore** : « véhicule » est un concept abstrait — tu ne peux pas acheter « un véhicule » en général, seulement une voiture, une moto... concrètes. Mais tout véhicule **promet** d'avoir un `démarrer()`.
+
+🔍 **Abstraite vs concrète** :
+
+| | Au moins 1 méthode pure ? | Instanciable ? | Rôle |
+|---|---|---|---|
+| **Classe abstraite** | Oui | ❌ Non | Définir un contrat / une base commune |
+| **Classe concrète** | Non (toutes définies) | ✅ Oui | Être réellement utilisée |
+
+⚠️ **Piège** : si une classe fille oublie de définir **une seule** méthode pure héritée, elle reste **abstraite** → `new Fille` ne compile pas (« *cannot allocate an object of abstract type* »). C'est exactement l'erreur rencontrée quand `Character`/`MateriaSource` ne déclaraient pas leurs overrides.
+
+🧠 **Mnémotechnique** : *« `= 0` = zéro instance possible. »*
+
+🚀 **Usage 42** : au CPP04 ex02, on rend `Animal` abstraite (`AAnimal`) pour interdire de créer un animal « générique » qui ne fait aucun son.
+
+---
+
+## 🔌 Interface (classe abstraite pure)
+
+📘 **Définition** : une **interface** est une classe abstraite **100 % pure** — elle ne contient **que** des méthodes virtuelles pures + un **destructeur virtuel**, et **aucune donnée**. Le mot-clé `interface` n'existe pas en C++ : on utilise une classe abstraite pure (convention de nommage : préfixe `I`).
+
+```cpp
+class ICharacter {
+public:
+    virtual ~ICharacter() {}                              // destructeur virtuel
+    virtual std::string const & getName() const = 0;      // que des
+    virtual void equip(AMateria* m) = 0;                  // méthodes
+    virtual void unequip(int idx) = 0;                    // virtuelles
+    virtual void use(int idx, ICharacter& target) = 0;    // pures
+};
+```
+
+🎯 **Le rôle d'une interface** : définir un **contrat**. Quiconque implémente `ICharacter` *promet* de fournir ces 4 méthodes. Le reste du code peut alors manipuler n'importe quel `ICharacter*` sans connaître la classe concrète derrière (`Character`).
+
+### ⚠️ Points cruciaux d'une interface
+
+- **Pas d'attribut, pas de logique** : les données (`_name`, l'inventaire...) vivent dans la classe **concrète** (`Character`), jamais dans l'interface.
+- **Pas de forme canonique à écrire** : rien à copier → pas de constructeur/copie/`operator=` à déclarer. Le compilateur fournit le constructeur par défaut implicite (rien à initialiser).
+- **Destructeur virtuel OBLIGATOIRE** (`virtual ~ICharacter() {}`) : sans lui, `delete` sur un `ICharacter*` qui pointe vers un `Character` est un comportement indéfini.
+
+🔍 **Interface vs classe abstraite « normale »** :
+
+| | Interface (`ICharacter`) | Classe abstraite avec état (`AMateria`) |
+|---|---|---|
+| Attributs | ❌ aucun | ✅ oui (`_type`) |
+| Méthodes | toutes pures | mélange (pures + concrètes) |
+| Forme canonique | non | **oui** (elle stocke des données) |
+| Exemple 42 | `ICharacter`, `IMateriaSource` | `AMateria` |
+
+🧠 **Mnémotechnique** : *« Interface = contrat creux : que des promesses, zéro donnée, + un destructeur virtuel. »*
+
+---
+
+## 🧬 L'idiome clone() et la copie profonde polymorphique
+
+📘 **Le problème** : tu as un `AMateria*` mais tu ignores si c'est un `Ice` ou un `Cure`. Comment en faire une **copie du bon type** ? Tu ne peux pas écrire `new Ice(...)` puisque tu ne connais pas le type. C'est là qu'intervient `clone()`.
+
+📐 **L'idiome** (aussi appelé *virtual constructor* ou patron *Prototype*) : chaque classe concrète redéfinit `clone()` pour renvoyer une copie d'elle-même.
+
+```cpp
+virtual AMateria* clone() const = 0;          // dans la base abstraite
+
+AMateria* Ice::clone() const  { return new Ice(*this); }   // chacun
+AMateria* Cure::clone() const { return new Cure(*this); }  // se clone
+```
+
+Désormais, `m->clone()` renvoie un `Ice*` si `m` pointe sur un `Ice`, un `Cure*` si c'est un `Cure` — décidé **à l'exécution** grâce à `virtual`.
+
+### 🌊 Copie profonde (*deep copy*) vs copie superficielle (*shallow copy*)
+
+⚠️ Quand une classe possède des **pointeurs vers des objets alloués** (l'inventaire de `Character`, les templates de `MateriaSource`), la copie générée par défaut **copie les pointeurs**, pas les objets → deux objets partagent la même mémoire (*shallow*). Au premier `delete`, l'autre pointe dans le vide → **double-free / crash**.
+
+```cpp
+// ❌ SHALLOW : les deux Character pointent vers les MÊMES Materias
+this->_inventory[i] = src._inventory[i];
+
+// ✅ DEEP : chaque Character a SES PROPRES Materias
+this->_inventory[i] = src._inventory[i]->clone();
+```
+
+### 📐 Le pattern complet (copie profonde dans l'OCF)
+
+Dans le **constructeur de copie** : cloner chaque élément non-NULL.
+Dans l'**`operator=`** : **d'abord `delete`** l'ancien contenu, **ensuite** cloner le nouveau (sinon fuite).
+
+```cpp
+Character& Character::operator=(const Character& src) {
+    if (this != &src) {
+        _name = src._name;
+        for (int i = 0; i < 4; i++) {
+            if (_inventory[i]) delete _inventory[i];        // 1. libère l'ancien
+            _inventory[i] = src._inventory[i]
+                ? src._inventory[i]->clone() : NULL;        // 2. clone le nouveau
+        }
+    }
+    return *this;
+}
+```
+
+🎨 **Métaphore** : copie superficielle = photocopier l'**adresse** d'une maison (deux papiers, une seule maison). Copie profonde = **reconstruire** une maison identique à côté. Si tu démolis l'une, l'autre tient toujours.
+
+🧠 **Mnémotechnique** : *« Pointeur possédé → clone, pas copie. Et dans `operator=` : delete avant clone. »*
+
+🔍 **Checklist mémoire (validée au valgrind)** :
+
+| Situation | À faire |
+|---|---|
+| Classe possède des pointeurs alloués | Copie profonde (`clone()`) dans copie + `operator=` |
+| `operator=` | `delete` l'ancien **avant** de cloner |
+| Base manipulée via pointeur | Destructeur **`virtual`** |
+| Materia « laissée par terre » (`unequip`, inventaire plein) | La `delete` toi-même (la classe ne la possède plus) |
+
+---
+
 ## 🧠 Récap visuel
 
 ```
@@ -1907,6 +2084,11 @@ Le sujet exige que `DiamondTrap` ait un nom **propre** (`_name`) distinct du nom
 | **Classe abstraite** | Classe contenant au moins une méthode virtuelle pure, qu'on ne peut pas instancier |
 | **Méthode virtuelle** | Méthode pouvant être redéfinie dans une classe fille (mot-clé `virtual`) |
 | **Méthode virtuelle pure** | `virtual void f() = 0;` — doit être redéfinie dans les filles |
+| **Interface** | Classe abstraite 100 % pure (que des méthodes pures + destructeur virtuel, aucune donnée) ; convention de nommage `I...` |
+| **Liaison dynamique** | Choix de la méthode à l'**exécution** selon le type réel de l'objet (grâce à `virtual`) |
+| **vtable** | Table des fonctions virtuelles ; mécanisme interne de la liaison dynamique |
+| **`clone()` (virtual constructor)** | Idiome : chaque classe se copie elle-même via `new Type(*this)` — utile quand on ne connaît que le type de base |
+| **Copie profonde / superficielle** | *Deep* : duplique les objets pointés (`clone()`) ; *shallow* : copie juste les pointeurs (→ double-free) |
 | **Slicing** | Perte de la spécificité d'une classe fille lors d'une copie par valeur vers la classe parente |
 | **RAII** | *Resource Acquisition Is Initialization* — l'idiome où un objet acquiert sa ressource à la construction et la libère à la destruction |
 | **DRY** | *Don't Repeat Yourself* — principe : éviter la duplication de code |
