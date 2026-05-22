@@ -22,7 +22,8 @@ class Dog : public Animal
 	Dog&operator=(const Dog& src);
 
 	/*===Getters & Setters===*/
-	
+	std::string		getMyBrainIdeas(int index)const;
+	void			setMyBrainIdeas(int index, std::string idea);
 
 	/*===Member Function===*/
 	virtual void	makeSound(void) const;

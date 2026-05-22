@@ -16,6 +16,9 @@ Dog::~Dog(void)
 Dog::Dog(const Dog& to_copy)
 	:Animal(to_copy)
 {
+	if (this->_myBrain)
+		delete this->_myBrain;
+	this->_myBrain = new Brain(*(to_copy._myBrain));
 	std::cout << "Dog copy constructor called" << std::endl;
 }
 
@@ -24,10 +27,23 @@ Dog & Dog::operator=(const Dog& src)
 	std::cout << "Dog assigenemnt operator called" << std::endl;
 	if (this != &src)
 	{
+		if (this->_myBrain)
+			delete this->_myBrain;
 		for (int i = 0; i < 100; i++)
 			this->_myBrain = src._myBrain;
 	}
 	return (*this);
+}
+
+/*===Getters & Setters===*/
+std::string	Dog::getMyBrainIdeas(int index)const
+{
+	return (this->_myBrain->getIdeas(index));
+}
+
+void	Dog::setMyBrainIdeas(int index, std::string idea)
+{
+	this->_myBrain->setIdeas(index, idea);
 }
 
 /*===Member Function===*/
