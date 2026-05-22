@@ -24,7 +24,8 @@ Cat & Cat::operator=(const Cat& src)
 	std::cout << "Cat operator assignement called" << std::endl;
 	if (this != &src)
 	{
-		Animal::operator=(src);
+		for (int i = 0; i < 100; i++)
+			this->_myBrain = src._myBrain;
 	}
 	return(*this);
 }
