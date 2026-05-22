@@ -42,7 +42,3 @@ std::string Animal::getType(void)const
 }
 
 /*===Member Function===*/
-void	Animal::makeSound(void) const
-{
-	std::cout << "*Long silence*" << std::endl;
-}

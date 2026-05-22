@@ -49,10 +49,10 @@ int	main(void)
 	}
 	SECTION("TEST BRAIN ACCES");
 	{
-		const Cat cat;
+		Cat cat;
 
-		std:: cout << cat.getMyBrainIdeas(4) << std::endl;
-		std:: cout << cat.getMyBrainIdeas(98) << std::endl;
+		cat.setMyBrainIdeas(0, "Meow, Meow");
+		std::cout << cat.getMyBrainIdeas(0) << std::endl;
 	}
 	return (0);
 }
