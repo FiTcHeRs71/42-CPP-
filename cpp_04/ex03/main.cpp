@@ -1,4 +1,4 @@
-#include "./AMateria/AMateria.hpp"
+/*#include "./AMateria/AMateria.hpp"
 #include "./Ice_Cure/Ice_Cure.hpp"
 #include "./ICharacter/ICharacter.hpp"
 
@@ -84,9 +84,8 @@ int	main(void)
 		me->equip(src->createMateria("ice"));
 
 		AMateria* overflow = src->createMateria("ice");
-		me->equip(overflow); // ignore
+		me->equip(overflow);
 		std::cout << "-- equip sur inventaire plein : rien ne se passe --" << std::endl;
-		delete overflow;
 
 		delete me;
 		delete src;
@@ -145,9 +144,9 @@ int	main(void)
 	}
 
 	return (0);
-}
+} */
 
-/*#include "./AMateria/AMateria.hpp"
+#include "./AMateria/AMateria.hpp"
 #include "./Ice_Cure/Ice_Cure.hpp"
 #include "./ICharacter/ICharacter.hpp"
 
@@ -215,7 +214,7 @@ void invalid_arguments_test()
 {
 	IMateriaSource* src = new MateriaSource();
 	src->learnMateria(new Ice());
-	// src->learnMateria(0);
+	src->learnMateria(0);
 	src->learnMateria(new Cure());
 	src->learnMateria(new Cure());
 	src->learnMateria(new Cure());
@@ -247,9 +246,9 @@ void invalid_arguments_test()
 
 int main()
 {
-	subject_provided_test();
-	copy_constructor_test();
+	//subject_provided_test();
+	//copy_constructor_test();
 	assignment_operator_test();
-	invalid_arguments_test();
+	//invalid_arguments_test();
 	return 0;
-}*/
+}
