@@ -246,9 +246,9 @@ void invalid_arguments_test()
 
 int main()
 {
-	//subject_provided_test();
-	//copy_constructor_test();
+	subject_provided_test();
+	copy_constructor_test();
 	assignment_operator_test();
-	//invalid_arguments_test();
+	invalid_arguments_test();
 	return 0;
 }
