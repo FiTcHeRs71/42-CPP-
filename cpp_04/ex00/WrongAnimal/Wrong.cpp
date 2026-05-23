@@ -33,7 +33,7 @@ std::string	WrongAnimal::getType(void)const
 
 void	WrongAnimal::makeSound(void)
 {
-	std::cout << "I'm a Wromg Animal" << std::endl;
+	std::cout << "I'm a Wrong Animal" << std::endl;
 }
 
 WrongCat::WrongCat(void)

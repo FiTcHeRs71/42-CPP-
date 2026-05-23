@@ -16,6 +16,7 @@ Dog::~Dog(void)
 Dog::Dog(const Dog& to_copy)
 	:Animal(to_copy)
 {
+	this->_myBrain = new Brain(*to_copy._myBrain);
 	std::cout << "Dog copy constructor called" << std::endl;
 }
 
@@ -25,6 +26,8 @@ Dog & Dog::operator=(const Dog& src)
 	if (this != &src)
 	{
 		Animal::operator=(src);
+		delete this->_myBrain;
+		this->_myBrain = new Brain(*src._myBrain);
 	}
 	return (*this);
 }

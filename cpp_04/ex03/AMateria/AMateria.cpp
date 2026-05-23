@@ -36,7 +36,6 @@ std::string const & AMateria::getType()const
 }
 
 /*===Member Function===*/
-//virtual AMateria* clone() const = 0;
 void	AMateria::use(ICharacter& target)
 {
 	(void)target;
@@ -104,6 +103,7 @@ void	MateriaSource::learnMateria(AMateria* m)
 			return ;
 		}
 	}
+	//delete m;
 }
 
 AMateria*	MateriaSource::createMateria(std::string const & type)
