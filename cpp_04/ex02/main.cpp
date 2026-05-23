@@ -53,8 +53,6 @@ int	main(void)
 
 		cat.setMyBrainIdeas(5, "Genious cat idea");
 
-		Dog dog = cat;
-
 		std:: cout << cat.getMyBrainIdeas(4) << std::endl;
 		std:: cout << cat.getMyBrainIdeas(98) << std::endl;
 	}

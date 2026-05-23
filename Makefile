@@ -44,9 +44,16 @@ fclean: clean
 	@echo "$(CYAN)✓ $(NAME) removed$(RESET)"
  
 re: fclean all
- 
+
 run: all
 	@echo "$(GREEN)🚀 Running $(NAME)...$(RESET)"
 	@./$(NAME)
- 
-.PHONY: all clean fclean re run
+
+# Nettoie tous les exercices (cpp_XX/exYY) via le script fclean_all.sh
+fclean-all:
+	@./fclean_all.sh fclean
+
+clean-all:
+	@./fclean_all.sh clean
+
+.PHONY: all clean fclean re run fclean-all clean-all
