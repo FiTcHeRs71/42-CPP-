@@ -21,10 +21,10 @@ class Brain
 
 	/*===Getters & Setters===*/
 	std::string getIdeas(int index)const;
+	void		setIdeas(int index, std::string idea);
 
 	/*===Member Function===*/
 	
 };
-
 
 #endif /*__BRAIN_HPP__*/

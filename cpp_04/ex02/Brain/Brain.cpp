@@ -2,14 +2,6 @@
 
 Brain::Brain(void)
 {
-	for (int i = 0; i < 50; i++)
-	{
-		_ideas[i] = "Baby Shark too too doo";
-	}
-	for (int i = 50; i < 100; i++)
-	{
-		_ideas[i] = "Daddy Shark too too doo";
-	}
 	std::cout << "Brain default constructor called" << std::endl;
 }
 
@@ -42,4 +34,9 @@ Brain & Brain::operator=(const Brain& src)
 std::string	Brain::getIdeas(int index)const
 {
 	return (this->_ideas[index]);
+}
+
+void	Brain::setIdeas(int index, std::string idea)
+{
+	this->_ideas[index] = idea;
 }

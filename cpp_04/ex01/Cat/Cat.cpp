@@ -38,11 +38,20 @@ Cat & Cat::operator=(const Cat& src)
 /*===Getters & Setters===*/
 std::string	Cat::getMyBrainIdeas(int index)const
 {
+	if (index > 99)
+	{
+		return ("My brain is not bigger for so many ideas");
+	}
 	return (this->_myBrain->getIdeas(index));
 }
 
 void	Cat::setMyBrainIdeas(int index, std::string idea)
 {
+	if (index > 99)
+	{
+		std::cout << "My brain is not bigger for so many ideas";
+		return;
+	}
 	this->_myBrain->setIdeas(index, idea);
 }
 

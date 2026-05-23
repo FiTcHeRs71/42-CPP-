@@ -49,10 +49,13 @@ int	main(void)
 	}
 	SECTION("TEST BRAIN ACCES");
 	{
-		Cat cat;
+		Cat	cat;
+		Dog	dog;
 
 		cat.setMyBrainIdeas(0, "Meow, Meow");
 		std::cout << cat.getMyBrainIdeas(0) << std::endl;
+		dog.setMyBrainIdeas(100, "Woas Woaf");
+		std::cout << dog.getMyBrainIdeas(0) << std::endl;
 	}
 	return (0);
 }
