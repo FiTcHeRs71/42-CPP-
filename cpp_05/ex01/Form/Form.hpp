@@ -6,6 +6,9 @@
 class Form
 {
 	private:
+
+	const std::string	_name;
+	bool				_is_signed;
 	
 
 	protected:
