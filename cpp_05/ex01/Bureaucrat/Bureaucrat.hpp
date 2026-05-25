@@ -5,6 +5,8 @@
 # include <ostream>
 # include <exception>
 
+class Form;
+
 class Bureaucrat
 {
 	private:
@@ -32,6 +34,7 @@ class Bureaucrat
 	/*===Member Function===*/
 	void		increaseGrade(void);
 	void		demotedGrade(void);
+	void		signForm(Form &form);
 
 	class GradeTooHighException : public std::exception
 	{
@@ -48,6 +51,6 @@ class Bureaucrat
 };
 
 /*===Overload Operator===*/
-std::ostream	&operator<<(std::ostream &flux, const Bureaucrat & bureaucrat);
+std::ostream	&operator<<(std::ostream &flux, const Bureaucrat &bureaucrat);
 
 #endif /*__BUREAUCRAT_HPP_*/

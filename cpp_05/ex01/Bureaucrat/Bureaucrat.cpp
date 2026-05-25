@@ -3,7 +3,7 @@
 /*===Canonical Form===*/
 Bureaucrat::Bureaucrat(void)
 	:_name("default")
-	,_grade(75)
+	,_grade(150)
 {
 	std::cout << "Bureaucrat default constructor called" << std::endl;
 }
@@ -76,6 +76,11 @@ void	Bureaucrat::demotedGrade(void)
 		this->_grade += 1;
 		std::cout << "due to insufficient work " << this->_name << " has been demoted, his rank is now " << this->_grade << std::endl;
 	}
+}
+
+void	Bureaucrat::signForm(Form &form)
+{
+	
 }
 
 const char	*Bureaucrat::GradeTooHighException::what() const throw()
