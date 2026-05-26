@@ -1,5 +1,5 @@
 #include "Form.hpp"
-# include "../Bureaucrat/Bureaucrat.hpp"
+#include "../Bureaucrat/Bureaucrat.hpp"
 
 /*===Canonical Form===*/
 Form::Form(void)
@@ -63,9 +63,11 @@ int	Form::getToExecute(void)const
 	return (this->_toExecute);
 }
 
-bool	Form::getIsSigned(void)const
+std::string	Form::getIsSigned(void)const
 {
-	return (this->_is_signed);
+	if (this->_is_signed)
+		return ("✓ true");
+	return ("✗ false");
 }
 
 /*===Member Function===*/

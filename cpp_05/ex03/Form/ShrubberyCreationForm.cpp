@@ -47,9 +47,9 @@ std::string		ShrubberyCreationForm::getTarget(void)const
 void	ShrubberyCreationForm::performAction() const
 {
 	std::ofstream outfile((_target + std::string("_shrubbery")).c_str());
-	std::cout << "shrubbery succesfull creation" << std::endl;
 	if (outfile)
 		{
+		std::cout << "shrubbery succesfull creation" << std::endl;
 		outfile <<
 		"         v" << std::endl <<
 		"        >X<" << std::endl <<

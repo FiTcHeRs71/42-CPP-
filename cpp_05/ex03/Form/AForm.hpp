@@ -9,31 +9,31 @@ class Bureaucrat;
 
 class AForm
 {
-	private:
+	protected:
 
 	const std::string	_name;
 	const int			_toSign;
 	const int			_toExecute;
 	bool				_is_signed;
-	virtual void		performAction() const = 0;
-
+	
 	public:
-
+	
 	/*===Canonical AForm===*/
 	AForm(void);
 	virtual~AForm(void);
 	AForm(const AForm& to_copy);
 	AForm&operator=(const AForm& src);
-
+	
 	AForm(std::string name, int to_sign, int to_execute, bool is_signed);
-
+	
 	/*===Getters & Setters===*/
 	std::string		getName(void)const;
 	int				getToSign(void)const;
 	int				getToExecute(void)const;
 	std::string		getIsSigned(void)const;
-
+	
 	/*===Member Function===*/
+	virtual void	performAction()const = 0;
 	void			beSigned(Bureaucrat &bureaucrat);
 	void			execute(Bureaucrat const & executor)const;
 

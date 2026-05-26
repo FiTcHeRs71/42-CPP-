@@ -33,7 +33,7 @@ class Form
 	std::string	getName(void)const;
 	int			getToSign(void)const;
 	int			getToExecute(void)const;
-	bool		getIsSigned(void)const;
+	std::string	getIsSigned(void)const;
 
 	/*===Member Function===*/
 	void		beSigned(Bureaucrat &bureaucrat);

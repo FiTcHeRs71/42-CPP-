@@ -1,5 +1,5 @@
 # Program name
-NAME = form
+NAME = intern
 
 # Directories
 OBJDIR = objs
@@ -7,6 +7,7 @@ OBJDIR = objs
 SRCS_MAIN = main.cpp
 BUREAUDIR = Bureaucrat
 FORMDIR = Form
+INTERNDIR = Intern
 
 SRCS_BUREAU = $(addprefix $(BUREAUDIR)/, \
 	Bureaucrat.cpp)
@@ -14,8 +15,11 @@ SRCS_BUREAU = $(addprefix $(BUREAUDIR)/, \
 SRCS_FORM = $(addprefix $(FORMDIR)/, \
 	AForm.cpp ShrubberyCreationForm.cpp PresidentialPardonForm.cpp RobotomyRequestForm.cpp)
 
+SRCS_INTERN = $(addprefix $(INTERNDIR)/, \
+	Intern.cpp)
+
 # Source files
-SRCS = $(SRCS_MAIN) $(SRCS_BUREAU) $(SRCS_FORM)
+SRCS = $(SRCS_MAIN) $(SRCS_BUREAU) $(SRCS_FORM) $(SRCS_INTERN)
 
 # Object files
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
