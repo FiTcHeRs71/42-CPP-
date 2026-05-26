@@ -4,7 +4,8 @@
 # include <iostream>
 # include <ostream>
 # include <string>
-# include "../Bureaucrat/Bureaucrat.hpp"
+
+class Bureaucrat;
 
 class Form
 {
@@ -29,7 +30,7 @@ class Form
 	Form(std::string name, int to_sign, int to_execute, bool is_signed);
 
 	/*===Getters & Setters===*/
-	std::string	getNAme(void)const;
+	std::string	getName(void)const;
 	int			getToSign(void)const;
 	int			getToExecute(void)const;
 	bool		getIsSigned(void)const;
@@ -50,6 +51,6 @@ class Form
 	};
 };
 
-std::ostream	operator<<(const std::ostream &flux, const Form &form);
+std::ostream	&operator<<(std::ostream &flux, const Form &form);
 
 #endif /*__FORM_HPP__*/

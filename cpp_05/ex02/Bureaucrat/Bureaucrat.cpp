@@ -1,5 +1,5 @@
 #include "Bureaucrat.hpp"
-# include "../Form/Form.hpp"
+# include "../Form/AForm.hpp"
 
 /*===Canonical Form===*/
 Bureaucrat::Bureaucrat(void)
@@ -79,9 +79,14 @@ void	Bureaucrat::demotedGrade(void)
 	}
 }
 
-void	Bureaucrat::signForm(Form &form)
+void	Bureaucrat::signForm(AForm &aform)
 {
-	form.beSigned(*this);
+	aform.beSigned(*this);
+}
+
+void	Bureaucrat::executeForm(AForm &aform)
+{
+	aform.execute(*this);
 }
 
 const char	*Bureaucrat::GradeTooHighException::what() const throw()

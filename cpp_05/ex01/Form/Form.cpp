@@ -1,4 +1,5 @@
 #include "Form.hpp"
+# include "../Bureaucrat/Bureaucrat.hpp"
 
 /*===Canonical Form===*/
 Form::Form(void)
@@ -39,11 +40,15 @@ Form::Form(std::string name, int to_sign, int to_execute, bool is_signed)
 	,_toExecute(to_execute)
 	,_is_signed(is_signed)
 {
-	std::cout << "Form full constructor called" << std::endl;
+	if (to_sign > 150 || to_execute > 150)
+		throw GradeTooLowException();
+	else if (to_sign < 1 || to_execute < 1)
+		throw GradeTooHighException();
+	std::cout << "Form full construcxtor called" << std::endl;
 }
 
 /*===Getters & Setters===*/
-std::string	Form::getNAme(void)const
+std::string	Form::getName(void)const
 {
 	return (this->_name);
 }
@@ -64,9 +69,22 @@ bool	Form::getIsSigned(void)const
 }
 
 /*===Member Function===*/
-void		beSigned(Bureaucrat &bureaucrat)
+void	Form::beSigned(Bureaucrat &bureaucrat)
 {
-
+	if (bureaucrat.getGrade() > this->getToSign())
+	{
+		std::cout << bureaucrat.getName() << " couldn't sign " << this->_name << " because ";
+		throw GradeTooLowException();
+	}
+	else if (this->_is_signed == false)
+	{
+		this->_is_signed = true;
+		std::cout << bureaucrat << " have signed : " << this ->_name << std::endl;
+	}
+	else
+	{
+		std::cout << "Form is already signed" << std::endl;
+	}
 }
 
 const char	*Form::GradeTooHighException::what() const throw()
@@ -82,6 +100,6 @@ const char	*Form::GradeTooLowException::what()  const throw()
 /*===Overload Operator===*/
 std::ostream	&operator<<(std::ostream &flux, Form const &form)
 {
-	flux << "Name : " << form.getNAme() << ", Sign Grade : " << form.getToSign() << ", Execute Grade : " << form.getToExecute() << ", is signed : " << form.getIsSigned() << std::endl;
+	flux << "Name : " << form.getName() << ", Sign Grade : " << form.getToSign() << ", Execute Grade : " << form.getToExecute() << ", is signed : " << form.getIsSigned();
 	return (flux);
 }
