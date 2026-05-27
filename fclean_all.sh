@@ -16,6 +16,7 @@ find "$ROOT" -name Makefile -not -path "$ROOT/Makefile" | sort | while read -r m
 	dir="$(dirname "$mk")"
 	printf "${YELLOW}➜ make %s${RESET} dans ${CYAN}%s${RESET}\n" "$TARGET" "${dir#$ROOT/}"
 	make -C "$dir" "$TARGET" 2>/dev/null
+	rm -rf "$dir/.claude"
 done
 
 printf "${GREEN}✓ Terminé : '%s' exécuté partout.${RESET}\n" "$TARGET"

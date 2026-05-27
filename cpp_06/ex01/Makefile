@@ -1,14 +1,14 @@
 # Program name
-NAME = scalar
+NAME = serializer
  
 # Directories
 OBJDIR = objs
 
 SRCS_MAIN = main.cpp
-SCALARDIR = ScalarConverte
+SERIADIR = Serializer
 
-SRCS_FILES = $(addprefix $(SCALARDIR)/, \
-	convert.cpp ScalarConverte.cpp ScalarConverte_parsing.cpp)
+SRCS_FILES = $(addprefix $(SERIADIR)/, \
+	Serializer.cpp)
 
 # Source files
 SRCS = $(SRCS_MAIN) $(SRCS_FILES)

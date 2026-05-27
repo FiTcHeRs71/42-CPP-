@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-static bool	isChar(std::string str, size_t &len)
+static bool	isChar(const std::string str, size_t &len)
 {
 	if (len == 1 && !isdigit(str[0]))
 		return (true);
@@ -12,19 +12,15 @@ static bool	isChar(std::string str, size_t &len)
 	return (false);
 }
 
-static bool	isInt(std::string str, size_t &len)
+static bool	isInt(const std::string str, size_t &len)
 {
-	int flag = false;
-	int idx	= 0;
+	size_t idx	= 0;
 
-	if (len <= 0)
-		return (false);
 	if (str[0] == '+' || str[0] == '-')
-	{
-		flag = true;
 		idx++;
-	}
-	while ((str[idx] && len < 12) || (!flag && str[idx] && len < 11))
+	if (idx == len)
+		return (false);
+	while (idx < len)
 	{
 		if (!isdigit(str[idx]))
 			return (false);
@@ -73,12 +69,15 @@ e_type  whichType(const std::string &str, size_t &len)
 		else if (isSpecial(str))
 			return (SPECIAL);
 	}
-	else if (f != std::string::npos && dot != std::string::npos)
+	else
 	{
 		if (isFloat(str, len, dot))
-			return (FLOAT);
+		{
+			if (f != std::string::npos)
+				return (FLOAT);
+			else
+				return (DOUBLE);
+		}
 	}
-	else if (f == std::string::npos && dot != std::string::npos)
-		return (DOUBLE);
 	return (INVALID);
 }

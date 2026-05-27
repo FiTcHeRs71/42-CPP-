@@ -18,6 +18,7 @@ ScalarConverte::ScalarConverte(const ScalarConverte& to_copy)
 	std::cout << "ScalarConverte copy constructor called" << std::endl;
 	*this = to_copy;
 }
+
 ScalarConverte & ScalarConverte::operator=(const ScalarConverte& src)
 {
 	std::cout << "ScalarConverte operator assignement(=) called" << std::endl;
@@ -39,9 +40,20 @@ void	ScalarConverte::convert(const std::string str)
 		case INVALID :
 			std::cout << "Invalid input" << std::endl;
 			break;
-		case CHAR:
+		case CHAR :
 			convertChar(str, len);
 			break;
-		
+		case SPECIAL :
+			printSpecial(str);
+			break;
+		case INT :
+			convertInt(str);
+			break;
+		case FLOAT:
+			convertFloat(str);
+			break;
+		case DOUBLE :
+			convertDouble(str);
+			break;
 	}
 }
