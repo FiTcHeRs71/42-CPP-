@@ -1,8 +1,19 @@
 #ifndef SCALAR_CONVERTE_HPP
 # define SCALAR_CONVERTE_HPP
 
+#include <cstddef>
 #include <string>
 #include <iostream>
+
+enum    e_type
+{
+	SPECIAL,
+	CHAR,
+	INT,
+	FLOAT,
+	DOUBLE,
+	INVALID,
+};
 
 class ScalarConverte
 {
@@ -22,4 +33,7 @@ class ScalarConverte
 	static void	convert(const std::string str);
 };
 
-#endif/*SCALAR_CONVERTE_HPP*/
+e_type  whichType(const std::string& str, size_t& len);
+void	convertChar(std::string &str, size_t &len);
+
+#endif /*SCALAR_CONVERTE_HPP*/

@@ -1,4 +1,6 @@
 #include "ScalarConverte.hpp"
+#include <cstddef>
+#include <ctime>
 
 /*===Canonical Form===*/
 ScalarConverte::ScalarConverte(void)
@@ -27,7 +29,19 @@ ScalarConverte & ScalarConverte::operator=(const ScalarConverte& src)
 }
 
 /*===Member Function===*/
-static void	convert(const std::string str)
+void	ScalarConverte::convert(const std::string str)
 {
-	
+	size_t	len = str.length();
+	e_type	type = whichType(str, len);
+
+	switch (type)
+	{
+		case INVALID :
+			std::cout << "Invalid input" << std::endl;
+			break;
+		case CHAR:
+			convertChar(str, len);
+			break;
+		
+	}
 }
