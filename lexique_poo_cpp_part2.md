@@ -35,8 +35,17 @@
 **Outils de conception**
 10. [Pointeurs de fonction](#-pointeurs-de-fonction)
 
+**Conversions de type — les casts (CPP06)**
+11. [Conversion implicite vs explicite](#-conversion-implicite-vs-explicite)
+12. [Pourquoi 4 casts nommés (et pas le cast à la C) ?](#-pourquoi-4-casts-nommés-et-pas-le-cast-à-la-c-)
+13. [`static_cast` — la conversion logique](#-static_cast--la-conversion-logique)
+14. [`dynamic_cast` — l'identification vérifiée](#-dynamic_cast--lidentification-vérifiée)
+15. [`reinterpret_cast` — relire les bits autrement](#-reinterpret_cast--relire-les-bits-autrement)
+16. [`const_cast` — retirer (ou ajouter) le `const`](#-const_cast--retirer-ou-ajouter-le-const)
+17. [Quel cast choisir ? (tableau de décision)](#-tableau-de-décision--quel-cast-choisir-)
+18. [Aparté — la classe utilitaire non instanciable](#-aparté--la-classe-utilitaire-non-instanciable)
+
 **À venir**
-- Conversions de type (`static_cast`, `dynamic_cast`, `reinterpret_cast`, `const_cast`)
 - Généricité (templates de fonction et de classe)
 - Conteneurs, itérateurs et algorithmes (la STL)
 
@@ -415,6 +424,204 @@ Animal* makeAnimal(std::string type, std::string name)
 
 ---
 
+## 🔄 Conversion implicite vs explicite
+
+📘 **Convertir**, c'est faire passer une donnée d'un **type** à un autre. Le C++ le fait de deux manières : **implicitement** (le compilateur décide tout seul) ou **explicitement** (tu le demandes par un *cast*).
+
+### Implicite — le compilateur le fait dans ton dos
+
+```cpp
+int    i = 65;
+double d = i;     // int → double : automatique, silencieux
+char   c = i;     // int → char  : c devient 'A' (code ASCII 65)
+```
+
+Pratique… mais **dangereux** : une conversion qui **perd de l'information** (un `double → int` qui jette la partie décimale) se fait **sans le moindre avertissement**.
+
+### Explicite — tu signes pour la conversion
+
+```cpp
+double d = 3.99;
+int    i = static_cast<int>(d);   // tu ASSUMES la troncature → i vaut 3
+```
+
+🧠 **Mnémotechnique** : *« Explicite = je signe pour la perte. »* Le cast est ta **signature** : tu déclares au compilateur (et au lecteur) que tu **sais** ce que tu fais.
+
+### 🎨 Convertir une valeur ≠ recopier des octets
+
+📘 Un **type scalaire** contient **une seule valeur** : `char` (1 octet), `int` (4), `float` (4), `double` (8). Deux types de **même taille** (un `int` et un `float`, 4 octets chacun) **n'interprètent pas leurs bits de la même façon**.
+
+🎨 **Métaphore** : le mot **« PAIN »** écrit sur un papier se lit « nourriture » en français et « douleur » en anglais. Mêmes lettres (mêmes octets), **sens différent selon la langue (le type)**. Une vraie conversion traduit le **sens**, pas les lettres.
+
+🔑 D'où la distinction qui structure tout le module : convertir une **valeur** (traduire le sens → `static_cast`) n'a **rien à voir** avec réinterpréter des **bits** (relire les mêmes lettres autrement → `reinterpret_cast`).
+
+🚀 **Contexte 42** : le CPP06 insiste sur le mot **« explicitly »** — tu dois convertir avec un cast **visible**, jamais te reposer sur l'implicite. C'est tout l'esprit du module.
+
+---
+
+## 🧰 Pourquoi 4 casts nommés (et pas le cast à la C) ?
+
+📘 En C, il n'existe qu'**un seul** cast : `(type)valeur`. Il fait **tout** — le sûr, le douteux, l'illégal — **sans distinction**. C'est précisément le problème.
+
+```cpp
+Animal* a = (Animal*)quelquePointeur;   // conversion logique ? réinterprétation brutale ? mystère.
+```
+
+Le C++ **éclate** ce cast unique en **4 opérateurs nommés**, chacun porteur d'une intention claire :
+
+| Cast | Intention | Vérifié à… |
+|---|---|---|
+| `static_cast` | conversion « logique » entre types liés | la **compilation** |
+| `dynamic_cast` | descendre une hiérarchie en **vérifiant** le vrai type | l'**exécution** |
+| `reinterpret_cast` | relire les **bits** tels quels (bas niveau) | rien (à tes risques) |
+| `const_cast` | ajouter / retirer le `const` | la compilation |
+
+**Ce qu'on y gagne** :
+1. **Lisibilité** — le lecteur voit *quel genre* de conversion tu fais.
+2. **Sécurité** — le compilateur **refuse** un `static_cast` absurde que le cast C aurait laissé passer en silence.
+3. **Audit** — tu peux `grep reinterpret_cast` pour retrouver d'un coup toutes les conversions dangereuses du projet.
+
+🧠 **Mnémotechnique** : *« **S**tatic = sûr · **D**ynamic = vérifié · **R**einterpret = brutal · **C**onst = juste le const. »*
+
+---
+
+## ✅ `static_cast` — la conversion logique
+
+📘 La conversion **standard** entre types **logiquement liés** : entre numériques (`int`↔`float`↔`double`↔`char`), ou dans une hiérarchie de classes **quand tu es sûr** du type. Vérifiée à la **compilation**.
+
+```cpp
+double pi = 3.14159;
+int    n  = static_cast<int>(pi);    // 3   (troncature assumée)
+char   c  = static_cast<char>(65);   // 'A'
+float  f  = static_cast<float>(n);   // 3.0f
+```
+
+🔑 **Ce qu'il sait faire** :
+- Conversions **numériques** (avec perte éventuelle, mais **logique**).
+- **Upcast** (fille → mère) : toujours sûr.
+- **Downcast** (mère → fille) **sans vérification** : autorisé, mais c'est **à toi** de garantir que le type est bon — sinon comportement indéfini. Pour un downcast **vérifié**, c'est [`dynamic_cast`](#-dynamic_cast--lidentification-vérifiée).
+
+⚠️ **Ce qu'il refuse** : convertir entre types **sans rapport** (ex. `int*` → `float*`). Le compilateur t'arrête — et c'est une **bonne** nouvelle, il t'épargne une bêtise.
+
+🧠 **Mnémotechnique** : *« static_cast = la conversion que tu écrirais "à la main", mais propre et contrôlée. »*
+
+🚀 **Contexte 42 (esprit ex00 — scalaires)** : c'est l'outil pour faire circuler une valeur entre `char`/`int`/`float`/`double`. Mais attention — **trouver** le type de départ à partir d'un texte (`"42.0f"`) n'est **pas** un problème de cast, c'est du **parsing** (de la logique à toi de concevoir). Pense aussi à :
+> - `<limits>` (`std::numeric_limits<T>::max()` / `::min()`) pour détecter un **dépassement** (*overflow*) **avant** de convertir ;
+> - `<cmath>` pour les valeurs **spéciales** des flottants — `nan`, `+inf`, `-inf` — qui ne sont **pas** des nombres ordinaires (⚠️ `nan != nan` est **vrai** !) ;
+> - `isprint` : tout `int` valide ne correspond pas à un caractère **affichable**.
+
+---
+
+## 🔎 `dynamic_cast` — l'identification vérifiée
+
+📘 Sert à **descendre** dans une hiérarchie (mère → fille) **en vérifiant à l'exécution** que la conversion est légitime. Ne fonctionne **que** sur des classes **polymorphes** — au moins une méthode `virtual`, typiquement le [destructeur virtuel](lexique_poo_cpp.md#-le-destructeur-virtual-important-).
+
+```cpp
+Animal* a = getSomeAnimal();        // un Animal*… mais lequel, vraiment ?
+Dog*    d = dynamic_cast<Dog*>(a);  // est-ce un Dog ?
+if (d != NULL)
+    std::cout << "C'était bien un Dog !" << std::endl;
+```
+
+### 🔑 Le point crucial : pointeur vs référence en cas d'échec
+
+C'est **LE** concept du module — le comportement diffère selon que tu castes un **pointeur** ou une **référence** :
+
+| Tu castes un… | Si la conversion échoue… | Tu testes avec… |
+|---|---|---|
+| **pointeur** `dynamic_cast<Dog*>` | renvoie **`NULL`** | un `if` |
+| **référence** `dynamic_cast<Dog&>` | **lève `std::bad_cast`** | un `try` / `catch` |
+
+```cpp
+try {
+    Dog& d = dynamic_cast<Dog&>(refAnimal);   // une référence ne peut pas être "nulle"…
+    // … c'est un Dog
+}
+catch (std::bad_cast& e) {
+    // … ce n'en était pas un   (lien direct avec le chapitre [Exceptions](#-try--catch--attraper-une-exception) ci-dessus)
+}
+```
+
+🎨 **Métaphore** : `dynamic_cast` est un **contrôle d'identité**. « Es-tu un Dog ? » Avec un **pointeur**, on te répond « non » poliment (`NULL`). Avec une **référence**, comme tu **affirmais** que c'en était un, on déclenche l'**alarme** (`bad_cast`).
+
+🧠 **Mnémotechnique** : *« dynamic = je vérifie à l'exécution. Pointeur → NULL, référence → exception. »*
+
+🚀 **Contexte 42 (esprit ex02 — vrai type)** : identifier le type réel d'un objet manipulé via sa base, **sans** `typeid` (interdit par le sujet). La technique : tenter un `dynamic_cast` vers chaque type dérivé possible ; celui qui **réussit** révèle le vrai type. Le sujet demande une version **pointeur** **et** une version **référence** précisément pour te faire pratiquer **les deux mécanismes d'échec** (NULL vs exception).
+
+---
+
+## ⚡ `reinterpret_cast` — relire les bits autrement
+
+📘 La conversion **bas niveau** : prendre un paquet de bits et le **réinterpréter** comme un autre type, **sans aucune vérification ni transformation**. Le plus **dangereux** des quatre.
+
+```cpp
+Animal*   a   = new Animal();
+uintptr_t raw = reinterpret_cast<uintptr_t>(a);   // l'adresse vue comme un entier
+Animal*   b   = reinterpret_cast<Animal*>(raw);   // l'entier re-vu comme une adresse
+// a == b : l'aller-retour exact redonne le pointeur d'origine, intact
+```
+
+🔑 **L'idée** : une adresse mémoire **est** un nombre. `reinterpret_cast` te laisse passer de « pointeur » à « entier » et inversement. Il ne **change pas** les bits — il change seulement **comment on les lit**.
+
+📘 **`uintptr_t`** (`<cstdint>` / `<stdint.h>`) : un entier **non signé** garanti assez grand pour contenir n'importe quelle adresse. C'est le **bon** type pour stocker un pointeur ; un `int` ordinaire **tronquerait** l'adresse sur une machine 64 bits.
+
+🎨 **Métaphore** : regarder la **même photo** à travers des lunettes différentes. La photo (les bits) ne change pas ; ce que tu y vois, oui. Mets les mauvaises lunettes → tu vois n'importe quoi (crash ou bug silencieux).
+
+🧠 **Mnémotechnique** : *« reinterpret = mêmes bits, autre regard. Aucun filet de sécurité. »*
+
+🚀 **Contexte 42 (esprit ex01 — sérialisation)** : *sérialiser*, c'est transformer une donnée en une représentation **stockable/transportable**, puis la **reconstruire** à l'identique (désérialiser). Ici : `pointeur → uintptr_t → pointeur`, et l'aller-retour doit redonner **exactement** le pointeur de départ (c'est la propriété à **vérifier** dans ton programme de test).
+> 🎨 Tu notes l'adresse d'une maison sur un papier (sérialiser) ; plus tard, tu relis le papier et retrouves **la même maison** (désérialiser). Le papier ne contient pas la maison — juste de quoi la **retrouver**.
+
+---
+
+## 🔓 `const_cast` — retirer (ou ajouter) le `const`
+
+📘 Le seul cast capable d'**ajouter ou retirer** le qualificatif `const` (ou `volatile`). Il ne change **pas** le type, juste la « constance ».
+
+```cpp
+void legacyPrint(char* s);                  // vieille API qui oublie le const
+
+void show(const char* msg) {
+    legacyPrint(const_cast<char*>(msg));    // on retire le const pour appeler l'API
+}
+```
+
+⚠️ **Danger** : retirer le `const` puis **modifier réellement** une variable qui était **vraiment** `const` à l'origine = **comportement indéfini**. `const_cast` ne sert légitimement qu'à **s'interfacer** avec du code mal fichu (souvent du vieux C) qui oublie le `const` — **pas** à tricher avec tes propres `const`.
+
+🧠 **Mnémotechnique** : *« const_cast = j'enlève juste le panneau "interdit", à mes risques. »*
+
+🚀 **Contexte 42** : moins central que les autres au CPP06, mais il **complète le quatuor** des casts à connaître. À comprendre pour la culture et la défense.
+
+---
+
+## 🧮 Tableau de décision : quel cast choisir ?
+
+| Ta situation | Cast à utiliser |
+|---|---|
+| Convertir un `int` ↔ `double` ↔ `char`… | `static_cast` |
+| Monter dans la hiérarchie (fille → mère) | `static_cast` (ou implicite) |
+| Descendre (mère → fille) en **vérifiant** le vrai type | `dynamic_cast` |
+| « Cet objet de base est-il de tel type dérivé ? » | `dynamic_cast` |
+| Transformer un pointeur en entier (ou l'inverse) | `reinterpret_cast` |
+| Ajouter / retirer un `const` | `const_cast` |
+| Tu hésites entre deux casts | mauvais **design** probable — réfléchis avant de caster |
+
+🔍 **Règle d'or** : demande-toi **toujours** d'abord si `static_cast` suffit. Les trois autres sont des outils de **cas particuliers** (héritage vérifié, bas niveau, const). Un projet truffé de `reinterpret_cast` est presque toujours un projet **mal conçu**.
+
+---
+
+## 🔒 Aparté — la classe utilitaire non instanciable
+
+📘 Certaines classes du CPP06 ne **stockent rien** : elles n'existent que pour **héberger des méthodes `static`** (un convertisseur, un sérialiseur…). Créer un objet d'une telle classe n'aurait aucun sens — on l'**empêche**.
+
+🔑 **Comment ?** En rendant le **constructeur `private`** (déclaré, souvent non implémenté). Sans constructeur accessible, `ScalarConverter sc;` **ne compile pas** ; on appelle alors les méthodes via `ScalarConverter::convert(...)`. (Rappel : la [visibilité](lexique_poo_cpp.md#--public--private---protected---la-visibilité-access-specifiers) de la Partie 1.)
+
+🎨 **Métaphore** : une **boîte à outils murale** — tu te sers d'un outil (`::convert`), tu n'emportes pas le mur. La classe est un **rangement de fonctions**, pas un objet à fabriquer.
+
+🚀 **Contexte 42** : `ScalarConverter` (ex00) et `Serializer` (ex01) sont exactement ça — des classes **non instanciables**, porteuses de méthodes `static` uniquement.
+
+---
+
 ## 📚 Termes complémentaires
 
 | Terme | Définition rapide |
@@ -430,6 +637,15 @@ Animal* makeAnimal(std::string type, std::string name)
 | **RAII** | Acquérir la ressource au constructeur, la libérer au destructeur |
 | **`std::terminate`** | Fonction appelée si une exception n'est jamais attrapée → `abort` |
 | **Pointeur de fonction** | Variable contenant l'adresse d'une fonction, appelable directement |
+| **Cast** | Opérateur de conversion de type ; le C++ en propose 4 nommés |
+| **`static_cast`** | Conversion logique entre types liés, vérifiée à la compilation |
+| **`dynamic_cast`** | Downcast vérifié à l'exécution (classes polymorphes) ; échec → `NULL` (pointeur) ou `std::bad_cast` (référence) |
+| **`reinterpret_cast`** | Réinterprétation brute des bits (pointeur ⇄ entier) ; aucune vérification |
+| **`const_cast`** | Ajoute / retire le `const` (ou `volatile`) |
+| **Upcast / Downcast** | Convertir fille → mère (sûr) / mère → fille (à vérifier) |
+| **`uintptr_t`** | Entier non signé assez grand pour contenir n'importe quelle adresse |
+| **Sérialiser** | Transformer une donnée en représentation reconstructible à l'identique |
+| **`std::bad_cast`** | Exception levée par un `dynamic_cast` de **référence** qui échoue |
 
 ---
 
@@ -456,6 +672,16 @@ Animal* makeAnimal(std::string type, std::string name)
 11. Pourquoi ne faut-il jamais laisser une exception sortir d'un destructeur ?
 12. Comment un tableau de pointeurs de fonction remplace-t-il une cascade de `if/else` ?
 
+### Niveau 4 — Conversions de type (casts)
+
+13. Quels sont les 4 casts du C++, l'intention de chacun, et pourquoi les préférer au cast « à la C » ?
+14. Quelle est la différence entre une conversion **implicite** et **explicite** ?
+15. À quelle condition une classe peut-elle être la cible d'un `dynamic_cast` ?
+16. Que renvoie un `dynamic_cast` de **pointeur** qui échoue ? Et un `dynamic_cast` de **référence** ?
+17. Que garantit l'aller-retour `reinterpret_cast` pointeur → entier → pointeur, et pourquoi `uintptr_t` plutôt qu'un `int` ?
+18. Pourquoi `reinterpret_cast` est-il le plus dangereux des quatre ?
+19. À quoi servent `<limits>` et `<cmath>` quand on convertit des scalaires ?
+
 ---
 
-*Lexique C++ Partie 2 — section exceptions complète. Les chapitres conversions / templates / STL suivront. Bonne continuation, fducrot !* 🚀
+*Lexique C++ Partie 2 — sections exceptions et conversions complètes. Les chapitres templates / STL suivront. Bonne continuation, fducrot !* 🚀
