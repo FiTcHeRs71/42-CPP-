@@ -72,7 +72,7 @@ void	convertFloat(const std::string& str)
 	else
 		std::cout << "'" << static_cast<char>(float_converted) << "'" << std::endl;
 	std::cout << "int: ";
-	if (float_converted > INT_MAX || float_converted < INT_MIN)
+	if (float_converted > static_cast<float>(INT_MAX) || float_converted < static_cast<float>(INT_MIN))
 		std::cout << "impossible" << std::endl;
 	else
 		std::cout << static_cast<int>(float_converted) << std::endl;
@@ -92,7 +92,7 @@ void	convertDouble(const std::string& str)
 	else
 		std::cout << "'" << static_cast<char>(double_converted) << "'" << std::endl;
 	std::cout << "int: ";
-	if (double_converted > INT_MAX || double_converted < INT_MIN)
+	if (double_converted > static_cast<double>(INT_MAX) || double_converted < static_cast<double>(INT_MIN))
 		std::cout << "impossible" << std::endl;
 	else
 		std::cout << static_cast<int>(double_converted) << std::endl;
