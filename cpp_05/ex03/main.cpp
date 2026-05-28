@@ -4,6 +4,9 @@
 #include "./Form/RobotomyRequestForm.hpp"
 #include "./Form/PresidentialPardonForm.hpp"
 #include "./Intern/Intern.hpp"
+#include <exception>
+#include <iostream>
+#include <cstdlib>
 
 #define SECTION(title) std::cout << "\n\033[1;36m===== " << title << " =====\033[0m\n" << std::endl
 
