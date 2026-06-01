@@ -48,6 +48,12 @@ int main(int, char**)
 		numbers[i] = rand();
 	}
 	std::cout << "value of the array at index 5 of 750 : " << numbers[5] << std::endl;
+	std::cout << "len of array is : " << numbers.size() << std::endl;
+	Array<int> a(5);
+	Array<int> b;
+	b = a;
+	std::cout << "b.size() = " << b.size() << std::endl;
+
 	delete [] mirror;//
 	return 0;
 }

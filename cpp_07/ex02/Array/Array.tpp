@@ -34,7 +34,19 @@ Array<T>::Array(int len)
 	this->_len = len;
 }
 
-//Array::Array&operator=(const Array& src);
+template<typename T>
+Array<T> & Array<T>::operator=(const Array& src)
+{
+	if (this != &src)
+	{
+		delete[] _array;
+		this->_len = src._len;
+		this->_array = new T[this->_len]();
+		for (int i = 0; i < this->_len; i++)
+			this->_array[i] = src._array[i];
+	}
+	return (*this);
+}
 
 /*===Member Function===*/
 template<typename T>
@@ -48,9 +60,15 @@ T	&Array<T>::operator[](int i)
 template<typename T>
 T const &Array<T>::operator[](int i) const
 {
-		if (i >= _len || i < 0)
+	if (i >= _len || i < 0)
 		throw OutOfBoundsException();
 	return (this->_array[i]);
+}
+
+template<typename T>
+unsigned int	Array<T>::size(void)const
+{
+	return (static_cast<unsigned int>(this->_len));
 }
 
 template <typename T>

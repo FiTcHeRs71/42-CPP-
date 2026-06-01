@@ -23,8 +23,9 @@ class Array
 	
 
 	/*===Member Function===*/
-	T		&operator[](int i);
-	T const	&operator[](int i)const;
+	T				&operator[](int i);
+	T const			&operator[](int i)const;
+	unsigned int	size(void)const;
 
 	class OutOfBoundsException : public std::exception
 		{
