@@ -32,25 +32,35 @@
 8. [Le déroulement de la pile (stack unwinding) et RAII](#-le-déroulement-de-la-pile-stack-unwinding-et-raii)
 9. [Règle d'or : jamais d'exception hors d'un destructeur](#-règle-dor--jamais-dexception-hors-dun-destructeur)
 
-**Outils de conception**
+**Outils de conception (callables)**
 10. [Pointeurs de fonction](#-pointeurs-de-fonction)
+11. [Foncteur (objet-fonction)](#-foncteur-objet-fonction)
 
 **Conversions de type — les casts (CPP06)**
-11. [Conversion implicite vs explicite](#-conversion-implicite-vs-explicite)
-12. [Pourquoi 4 casts nommés (et pas le cast à la C) ?](#-pourquoi-4-casts-nommés-et-pas-le-cast-à-la-c-)
-13. [`static_cast` — la conversion logique](#-static_cast--la-conversion-logique)
-14. [`dynamic_cast` — l'identification vérifiée](#-dynamic_cast--lidentification-vérifiée)
-15. [`reinterpret_cast` — relire les bits autrement](#-reinterpret_cast--relire-les-bits-autrement)
-16. [`const_cast` — retirer (ou ajouter) le `const`](#-const_cast--retirer-ou-ajouter-le-const)
-17. [Quel cast choisir ? (tableau de décision)](#-tableau-de-décision--quel-cast-choisir-)
-18. [Aparté — la classe utilitaire non instanciable](#-aparté--la-classe-utilitaire-non-instanciable)
+12. [Conversion implicite vs explicite](#-conversion-implicite-vs-explicite)
+13. [Pourquoi 4 casts nommés (et pas le cast à la C) ?](#-pourquoi-4-casts-nommés-et-pas-le-cast-à-la-c-)
+14. [`static_cast` — la conversion logique](#-static_cast--la-conversion-logique)
+15. [`dynamic_cast` — l'identification vérifiée](#-dynamic_cast--lidentification-vérifiée)
+16. [RTTI et `typeid`](#-rtti-et-typeid)
+17. [`reinterpret_cast` — relire les bits autrement](#-reinterpret_cast--relire-les-bits-autrement)
+18. [`const_cast` — retirer (ou ajouter) le `const`](#-const_cast--retirer-ou-ajouter-le-const)
+19. [Quel cast choisir ? (tableau de décision)](#-tableau-de-décision--quel-cast-choisir-)
+20. [Aparté — la classe utilitaire non instanciable](#-aparté--la-classe-utilitaire-non-instanciable)
+
+**Généricité — les templates (CPP07)**
+21. [La généricité — le problème](#-la-généricité--le-problème)
+22. [Template de fonction](#-template-de-fonction)
+23. [`typename` vs `class`](#-typename-vs-class)
+24. [Plusieurs paramètres de template](#-plusieurs-paramètres-de-template)
+25. [Template de classe](#-template-de-classe)
+26. [Pourquoi un template vit dans le header](#-pourquoi-un-template-vit-dans-le-header)
+27. [Instanciation implicite vs explicite](#-instanciation-implicite-vs-explicite)
 
 **À venir**
-- Généricité (templates de fonction et de classe)
-- Conteneurs, itérateurs et algorithmes (la STL)
+- Conteneurs, itérateurs et algorithmes (la STL — CPP08-09)
 
 **Annexes**
-- [Termes complémentaires](#-termes-complémentaires)
+- [Termes complémentaires](#-termes-complémentaires) (dont un **zoom sur l'opérateur ternaire**)
 - [Quiz d'auto-évaluation](#-quiz-dauto-évaluation)
 
 ---
@@ -424,6 +434,44 @@ Animal* makeAnimal(std::string type, std::string name)
 
 ---
 
+## 🪄 Foncteur (objet-fonction)
+
+📘 Un **foncteur** (*function object*) est un **objet qu'on peut appeler comme une fonction**. Techniquement : une classe qui **surcharge `operator()`**. On l'utilise exactement comme un appel — `f(x)` — sauf que `f` est un **objet**, pas une fonction.
+
+```cpp
+class Multiplier {
+private:
+    int _factor;
+public:
+    Multiplier(int factor) : _factor(factor) {}
+    int operator()(int x) const { return x * _factor; }   // ← operator()
+};
+
+Multiplier triple(3);
+std::cout << triple(10);   // 30 — on "appelle" l'objet triple
+```
+
+### 🔑 Foncteur vs pointeur de fonction
+
+Les deux sont **callables** (appelables), mais le foncteur a un **superpouvoir** : il **transporte un état**.
+
+| | Pointeur de fonction | Foncteur |
+|---|---|---|
+| Nature | adresse d'une fonction | objet d'une classe |
+| Appel | `f(x)` | `f(x)` (via `operator()`) |
+| Peut stocker un état ? | ❌ non | ✅ oui (ses attributs) |
+| Usage avec la STL | possible | souvent **préféré** |
+
+Un pointeur de fonction ne pourrait pas "retenir" le facteur 3 ; le foncteur, si — c'est son attribut `_factor`.
+
+🎨 **Métaphore** : un pointeur de fonction, c'est une **recette** affichée au mur (la même pour tous). Un foncteur, c'est un **cuisinier** : il connaît la recette **et** garde ses propres ingrédients en poche (son état). Tu lui dis « cuisine ! », il applique sa recette avec **ses** réglages.
+
+🧠 **Mnémotechnique** : *« Foncteur = un objet qui répond à `()`. »*
+
+🚀 **Contexte 42 (esprit ex01 — `iter`)** : ton template `iter(array, len, f)` accepte `f` **sans savoir** si c'est une fonction libre, un pointeur de fonction ou un foncteur — il lui suffit que `f(element)` soit valide. C'est la force du paramètre de template « callable » : il avale **tout ce qui s'appelle**. (Tu approfondiras les foncteurs avec la STL au CPP08-09.)
+
+---
+
 ## 🔄 Conversion implicite vs explicite
 
 📘 **Convertir**, c'est faire passer une donnée d'un **type** à un autre. Le C++ le fait de deux manières : **implicitement** (le compilateur décide tout seul) ou **explicitement** (tu le demandes par un *cast*).
@@ -550,6 +598,31 @@ catch (std::bad_cast& e) {
 
 ---
 
+## 🔬 RTTI et `typeid`
+
+📘 **RTTI** (*Run-Time Type Information*) est le mécanisme par lequel le C++ **garde la trace du vrai type** d'un objet **à l'exécution**. C'est ce qui rend [`dynamic_cast`](#-dynamic_cast--lidentification-vérifiée) possible : pour vérifier « est-ce vraiment un `Dog` ? », il faut bien que l'information du type réel **existe quelque part** au runtime.
+
+🔑 **Qui active la RTTI ?** Le `virtual`. Dès qu'une classe possède **au moins une méthode virtuelle** (typiquement le destructeur virtuel), le compilateur lui attache de quoi s'identifier à l'exécution (via la [vtable](lexique_poo_cpp.md#️-comment-ça-marche-la-vtable)). C'est pour ça que `dynamic_cast` **exige** une classe polymorphe.
+
+### 🆔 L'opérateur `typeid`
+
+📘 `typeid(expr)` (header `<typeinfo>`) renvoie un objet `std::type_info` qui **décrit le type** de `expr`. Sur un objet polymorphe déréférencé, il donne le **vrai** type dynamique.
+
+```cpp
+Base* p = new Dog();
+std::cout << typeid(*p).name();   // le type réel : "Dog" (nom décoré, non portable)
+```
+
+⚠️ **`typeid` est souvent interdit par les sujets 42** — et c'est volontaire. Le but pédagogique est de te faire **identifier un type sans lui**, uniquement avec des `dynamic_cast` successifs. C'est plus verbeux, mais ça t'oblige à comprendre le polymorphisme **en profondeur** plutôt qu'à lire une étiquette toute faite.
+
+🎨 **Métaphore** : `typeid`, c'est **demander la carte d'identité** (réponse directe). La méthode imposée (`dynamic_cast` en cascade), c'est un **interrogatoire** : « Es-tu un Dog ? Non. Un Cat ? Oui ! » — tu **déduis** le type des réponses.
+
+🧠 **Mnémotechnique** : *« RTTI = le runtime se souvient du vrai type ; `virtual` est l'interrupteur. »*
+
+🚀 **Contexte 42 (esprit ex02)** : identifier le type réel **sans `typeid`** — tu tentes `dynamic_cast<A*>`, `<B*>`, `<C*>` jusqu'à ce que l'un renvoie non-NULL (version pointeur) ou ne lève pas `bad_cast` (version référence). C'est l'application directe de la RTTI, sans le raccourci.
+
+---
+
 ## ⚡ `reinterpret_cast` — relire les bits autrement
 
 📘 La conversion **bas niveau** : prendre un paquet de bits et le **réinterpréter** comme un autre type, **sans aucune vérification ni transformation**. Le plus **dangereux** des quatre.
@@ -622,7 +695,310 @@ void show(const char* msg) {
 
 ---
 
+## 🧬 La généricité — le problème
+
+📘 La **généricité** (*genericity*) consiste à écrire du code qui **fonctionne pour n'importe quel type**, sans le réécrire pour chacun. En C++, l'outil s'appelle le **template** (*patron*, *modèle*).
+
+### 🤔 Le problème qu'on résout
+
+Imagine une fonction `swap` qui échange deux valeurs. Sans template, tu dois la **dupliquer** pour chaque type :
+
+```cpp
+void swap(int& a, int& b)                 { int tmp = a; a = b; b = tmp; }
+void swap(double& a, double& b)           { double tmp = a; a = b; b = tmp; }
+void swap(std::string& a, std::string& b) { std::string tmp = a; a = b; b = tmp; }
+// ... et ainsi de suite pour CHAQUE type. Catastrophe.
+```
+
+C'est une violation flagrante du principe [DRY](lexique_poo_cpp.md#-pourquoi-cette-approche-est-meilleure) : la **logique est identique**, seul le **type** change.
+
+🎨 **Métaphore** : un template, c'est un **emporte-pièce**. Le même outil découpe la pâte en cœur, qu'elle soit au chocolat (`int`), à la vanille (`double`) ou aux amandes (`std::string`). Tu ne fabriques pas un emporte-pièce par parfum.
+
+🧠 **Mnémotechnique** : *« Même logique, type variable → template. »*
+
+🚀 **Contexte 42** : tout le CPP07 est dédié aux templates — `swap`/`min`/`max` (ex00), `iter` (ex01), la classe `Array<T>` (ex02).
+
+---
+
+## 🧪 Template de fonction
+
+📘 Un **template de fonction** est un **patron** à partir duquel le compilateur **génère** une vraie fonction pour chaque type utilisé. On le déclare avec `template <typename T>`.
+
+```cpp
+template <typename T>
+void swap(T& a, T& b)
+{
+    T tmp = a;
+    a = b;
+    b = tmp;
+}
+```
+
+`T` est un **paramètre de type** : un nom de remplacement pour « le type qu'on précisera plus tard ».
+
+### 🎬 À l'utilisation
+
+```cpp
+int x = 5, y = 10;
+swap(x, y);                    // le compilateur DÉDUIT T = int
+
+std::string a = "hi", b = "yo";
+swap(a, b);                    // ici T = std::string
+```
+
+Tu n'écris la logique **qu'une fois** ; le compilateur fabrique une version par type rencontré. C'est l'**instanciation** du template (voir [plus bas](#-instanciation-implicite-vs-explicite)).
+
+🔑 **`T` doit « supporter » ce que tu fais avec.** Si ton template écrit `a > b`, alors `T` doit posséder un `operator>`. Avec `max`, par exemple :
+
+```cpp
+template <typename T>
+T max(const T& a, const T& b)
+{
+    return (a > b) ? a : b;   // exige que T ait operator>
+}
+```
+
+Si tu appelles `max` sur un type sans `operator>`, l'erreur surgit **à la compilation**, au moment de l'instanciation.
+
+🎨 **Métaphore** : le template est un **contrat à trous**. « Donne-moi un type `T` qui sait se comparer avec `>`, et je te rends le plus grand. » Tant que le type honore le contrat, ça marche.
+
+🚀 **Contexte 42 (ex00)** : `swap`, `min`, `max` sont exactement ces templates de fonction. Astuce : on les appelle souvent `::swap(a, b)` avec le `::` pour forcer **ta** version globale et éviter une collision avec `std::swap`.
+
+---
+
+## 🏷️ `typename` vs `class`
+
+📘 Dans la déclaration d'un template, **`typename` et `class` sont strictement équivalents** :
+
+```cpp
+template <typename T>   // version 1
+template <class T>      // version 2 — exactement la même chose ici
+```
+
+Les deux disent : « `T` est un paramètre de type ». Le mot `class` **n'impose pas** que `T` soit une classe — `T` peut très bien être `int` ou `char`.
+
+🔍 **Lequel choisir ?** Question de style. Beaucoup préfèrent **`typename`**, plus honnête (`T` n'est pas forcément une *classe*). Tu verras les deux ; sois juste **cohérent**.
+
+⚠️ **Nuance** : `typename` a un **second** usage (hors paramètre) pour désambiguïser un type dépendant : `typename Conteneur<T>::iterator it;`. Là, `class` ne marcherait pas. Mais pour **déclarer un paramètre**, les deux sont interchangeables.
+
+🧠 **Mnémotechnique** : *« Pour un paramètre de template : `typename` = `class`. »*
+
+🚀 **Contexte 42** : tu peux écrire `template <class T>` ou `template <typename T>` indifféremment dans tes corrections — sache juste **expliquer** qu'ils sont équivalents si on te le demande.
+
+---
+
+## 🎛️ Plusieurs paramètres de template
+
+📘 Un template peut prendre **plusieurs** paramètres de type, séparés par des virgules.
+
+```cpp
+template <typename T_array, typename T_function>
+void iter(T_array* array, size_t length, T_function func)
+{
+    for (size_t i = 0; i < length; i++)
+        func(array[i]);
+}
+```
+
+Ici **deux** types sont génériques :
+- `T_array` : le type des éléments du tableau (`int`, `std::string`…) ;
+- `T_function` : le type du **callable** appliqué à chaque élément.
+
+🔑 **Pourquoi rendre la fonction générique aussi ?** Parce que `func` peut être une **fonction libre**, un **pointeur de fonction** ou un [**foncteur**](#-foncteur-objet-fonction). Le template s'en moque : il exige seulement que `func(array[i])` **compile**. C'est la même philosophie que les algorithmes de la STL.
+
+```cpp
+void  printInt(int& n)        { std::cout << n << " "; }
+void  toUpper(std::string& s) { /* ... */ }
+
+int         nums[3]  = {1, 2, 3};
+iter(nums, 3, printInt);              // T_array=int,         T_function=void(*)(int&)
+
+std::string words[2] = {"a", "b"};
+iter(words, 2, toUpper);              // T_array=std::string, T_function=void(*)(std::string&)
+```
+
+🎨 **Métaphore** : `iter` est une **chaîne de montage** universelle. Tu lui branches un **tapis** (le tableau, n'importe quel type d'objet) et une **machine-outil** (le callable, n'importe quoi qui s'applique). Elle fait défiler et applique, sans se soucier de ce qui passe.
+
+🚀 **Contexte 42 (ex01)** : `iter` illustre à la fois les **templates multiples** et le **paramètre callable** — le pont parfait entre le chapitre [pointeurs de fonction](#-pointeurs-de-fonction) et les templates.
+
+---
+
+## 🗃️ Template de classe
+
+📘 On peut rendre **toute une classe** générique. Elle est alors paramétrée par un (ou plusieurs) type(s). C'est ainsi que sont faits les conteneurs (`std::vector<T>`, et ton `Array<T>`).
+
+```cpp
+template <typename T>
+class Array
+{
+private:
+    T*           _array;
+    unsigned int _size;
+public:
+    Array(void);
+    Array(unsigned int n);
+    Array(const Array& other);
+    Array&         operator=(const Array& other);
+    ~Array(void);
+
+    T&             operator[](int i);          // accès lecture/écriture
+    const T&       operator[](int i) const;    // accès lecture seule
+    unsigned int   size(void) const;
+};
+```
+
+`Array<int>`, `Array<std::string>`, `Array<Animal>` sont alors **trois classes distinctes**, générées par le compilateur à partir du même patron.
+
+🔑 **Tout ce que tu sais de la POO reste vrai.** Un template de classe a sa [forme canonique (OCF)](lexique_poo_cpp.md#-la-forme-canonique-orthodoxe-orthodox-canonical-form-ocf), sa [copie profonde](lexique_poo_cpp.md#-lidiome-clone-et-la-copie-profonde-polymorphique) s'il possède un pointeur (`new T[]`), ses exceptions. Le template **ne dispense de rien** — il généralise, c'est tout.
+
+### 🔁 Le double `operator[]` (const et non-const)
+
+⚠️ Tu remarques **deux** surcharges de `operator[]` ci-dessus. Ce n'est pas une erreur, c'est de la **const-correctness** :
+
+```cpp
+T&        operator[](int i);         // sur un Array NON-const → peut écrire
+const T&  operator[](int i) const;   // sur un Array const     → lecture seule
+```
+
+C'est le **`const` en fin de signature** (vu en [Partie 1](lexique_poo_cpp.md#-les-deux-const-dans-une-signature-de-méthode)) qui distingue les deux. Le compilateur choisit **automatiquement** la bonne version selon que l'objet est `const` ou non :
+
+```cpp
+Array<int>       a(5);
+const Array<int> b(5);
+
+a[0] = 42;                       // ✅ version non-const : écriture autorisée
+std::cout << b[0];               // ✅ version const : lecture seule
+b[0] = 42;                       // ❌ ERREUR : la version const renvoie const T&
+```
+
+🔑 **Pourquoi la version non-const renvoie `T&` (et pas `T`) ?** Pour permettre l'**écriture** `a[0] = 42`. Si elle renvoyait une copie (`T`), tu modifierais un temporaire jeté aussitôt — `a[0] = 42` ne changerait rien.
+
+🧠 **Mnémotechnique** : *« Une paire `operator[]` : la non-const pour écrire, la const pour lire. »*
+
+🎨 **Métaphore** : deux **guichets** pour le même registre. Le guichet « modification » (non-const) te laisse écrire dans le cahier ; le guichet « consultation » (const) te laisse seulement lire. C'est l'objet lui-même (const ou non) qui décide à quel guichet tu as droit.
+
+🚀 **Contexte 42 (ex02)** : `Array<T>` exige cette paire, plus une `OutOfBoundsException` levée si l'indice est hors bornes (relie au chapitre [exceptions](#-créer-ses-propres-exceptions)), et une **copie profonde** (sinon double-free sur le `delete[]`).
+
+---
+
+## 📂 Pourquoi un template vit dans le header
+
+📘 Contrairement à une classe normale (déclaration en `.hpp`, implémentation en `.cpp`), un template doit avoir son **implémentation visible dans le header**. On met donc **tout** dans le `.hpp` — ou dans un fichier `.tpp` **inclus à la fin** du `.hpp`.
+
+```cpp
+// Array.hpp
+#ifndef ARRAY_HPP
+# define ARRAY_HPP
+
+template <typename T>
+class Array { /* ... déclarations ... */ };
+
+# include "Array.tpp"   // ← l'implémentation, incluse À LA FIN du header
+#endif
+```
+
+### 🔑 Pourquoi cette contrainte ?
+
+Un template **n'est pas du code** : c'est une **recette pour générer** du code. Tant que personne n'écrit `Array<int>`, **aucune** fonction n'existe réellement. Quand le compilateur rencontre `Array<int>`, il doit **voir la recette complète** (le corps des méthodes) pour fabriquer la version `int`. Si l'implémentation était cachée dans un `.cpp` compilé à part, le compilateur ne la verrait pas au moment de l'instanciation → **erreur de l'éditeur de liens** (*undefined reference*).
+
+🎨 **Métaphore** : une classe normale, c'est un **plat déjà cuisiné** (le `.cpp` compilé) — chaque convive en reçoit une part. Un template, c'est une **recette** : pour que chaque convive cuisine **sa** version (au type voulu), il faut que la recette soit **sous ses yeux** (dans le header), pas enfermée dans la cuisine d'à côté.
+
+🔍 **Les conventions de fichier** :
+
+| Fichier | Contenu | Quand |
+|---|---|---|
+| `.hpp` seul | déclaration **+** implémentation ensemble | petits templates |
+| `.hpp` + `.tpp` | `.hpp` = déclaration, `.tpp` = implémentation (`#include` à la fin du `.hpp`) | gros templates, plus lisible |
+
+⚠️ Le `.tpp` (parfois `.ipp`) **n'est jamais** ajouté au Makefile ni compilé seul : il est **inclus** par le `.hpp`. Le seul point d'entrée reste le header.
+
+🧠 **Mnémotechnique** : *« Template = recette visible → tout dans le header. »*
+
+🚀 **Contexte 42 (ex02)** : c'est exactement le montage `Array.hpp` + `Array.tpp` avec `#include "Array.tpp"` en bas du `.hpp`. Sache **justifier** que séparer dans un `.cpp` casserait l'édition de liens.
+
+---
+
+## ♻️ Instanciation implicite vs explicite
+
+📘 **Instancier un template**, c'est le moment où le compilateur **génère une vraie version** pour un type donné. Deux façons :
+
+### Implicite — le compilateur déduit tout seul
+
+```cpp
+swap(x, y);             // x, y sont des int → T=int déduit automatiquement
+Array<int> arr(5);      // pour une CLASSE, on précise le type entre < >
+```
+
+Pour une **fonction**, le type se déduit des **arguments**. Pour une **classe**, il n'y a pas d'argument à analyser → tu **dois** écrire `<int>`.
+
+### Explicite — tu forces le type
+
+```cpp
+swap<double>(x, y);     // je FORCE T=double, même si x, y sont des int
+```
+
+Utile quand la déduction est ambiguë ou quand tu veux un type précis.
+
+🔑 **À ne pas confondre** : « instancier un *template* » (générer le type `Array<int>`) ≠ « instancier une *classe* » (créer un objet). Le premier fabrique le **type**, le second fabrique l'**objet**. Pour une classe template, les deux arrivent souvent dans la même ligne : `Array<int> a(5);` instancie **le type** `Array<int>` **puis** **l'objet** `a`.
+
+🎨 **Métaphore** : instancier le template, c'est **usiner le moule** `Array<int>` à partir du plan générique. Instancier la classe, c'est **couler un gâteau** dans ce moule. Un moule (le type), plusieurs gâteaux (les objets).
+
+🧠 **Mnémotechnique** : *« Template → type ; type → objet. Deux étages d'instanciation. »*
+
+🚀 **Contexte 42** : `Array<int> numbers(5);` enchaîne les deux — génération du type `Array<int>` et construction de l'objet `numbers`. Pour `swap`/`iter`, l'instanciation est **implicite** (déduite des arguments).
+
+---
+
 ## 📚 Termes complémentaires
+
+### 💡 Zoom — l'opérateur ternaire `? :`
+
+📘 L'**opérateur ternaire** est le seul opérateur du C++ à **trois opérandes**. C'est un **`if/else` condensé en une expression** qui **renvoie une valeur**.
+
+```cpp
+condition ? valeur_si_vrai : valeur_si_faux
+```
+
+Le `?` sépare la condition du premier choix ; le `:` sépare les deux choix.
+
+🎬 **Du `if/else` au ternaire** :
+
+```cpp
+// version if/else (5 lignes)
+int max;
+if (a > b)
+    max = a;
+else
+    max = b;
+
+// version ternaire (1 ligne) — STRICTEMENT équivalente
+int max = (a > b) ? a : b;
+```
+
+🔑 **Point clé : c'est une *expression*, pas une *instruction*.** Un `if` **exécute** ; un ternaire **produit une valeur** qu'on peut affecter, retourner ou passer en argument :
+
+```cpp
+return (a > b) ? a : b;                            // dans un return
+std::cout << (isSigned ? "✓ true" : "✗ false");    // directement dans un flux
+```
+
+C'est précisément ce qui le rend pratique dans `max`/`min` (CPP07 ex00) ou pour afficher l'état signé d'un `Form` (`getIsSigned`, CPP05).
+
+⚠️ **Piège — lisibilité** : les ternaires **imbriqués** deviennent vite illisibles. Au-delà d'un niveau, repasse au `if/else` :
+
+```cpp
+// ❌ illisible
+int r = a > b ? (a > c ? a : c) : (b > c ? b : c);
+// ✅ un if/else explicite est préférable dès que la logique se complexifie
+```
+
+⚠️ **Types compatibles obligatoires** : les deux branches doivent renvoyer un type cohérent. `cond ? 1 : "texte"` ne compile pas (`int` vs `const char*`).
+
+🧠 **Mnémotechnique** : *« condition `?` oui `:` non — un `if` qui rend une valeur. »*
+
+🎨 **Métaphore** : un **aiguillage ferroviaire**. La condition est le levier ; selon sa position, le train (la valeur) part à gauche ou à droite. Dans tous les cas, **un** train sort.
+
+---
 
 | Terme | Définition rapide |
 |---|---|
@@ -646,6 +1022,20 @@ void show(const char* msg) {
 | **`uintptr_t`** | Entier non signé assez grand pour contenir n'importe quelle adresse |
 | **Sérialiser** | Transformer une donnée en représentation reconstructible à l'identique |
 | **`std::bad_cast`** | Exception levée par un `dynamic_cast` de **référence** qui échoue |
+| **Foncteur** | Objet appelable comme une fonction (classe avec `operator()`) ; peut porter un état |
+| **`operator()`** | Opérateur d'appel ; le surcharger transforme une classe en foncteur |
+| **RTTI** | *Run-Time Type Information* : le runtime garde le vrai type (activé par `virtual`) |
+| **`typeid`** | Opérateur renvoyant le type d'une expression (`std::type_info`) ; souvent interdit en 42 |
+| **`std::type_info`** | Objet décrivant un type, renvoyé par `typeid` (`<typeinfo>`) |
+| **Généricité** | Écrire du code valable pour n'importe quel type, sans le dupliquer |
+| **Template** | Patron générant du code pour chaque type utilisé (`template <typename T>`) |
+| **Template de fonction** | Patron de fonction (ex. `swap`, `min`, `max`) ; type souvent déduit des arguments |
+| **Template de classe** | Patron de classe (ex. `Array<T>`) ; le type se précise entre `< >` |
+| **`typename` / `class`** | Équivalents pour déclarer un paramètre de template |
+| **Instanciation (template)** | Génération d'une version concrète du patron pour un type donné |
+| **`.tpp`** | Fichier d'implémentation d'un template, inclus à la fin du `.hpp` (jamais compilé seul) |
+| **Double `operator[]`** | Paire const/non-const : la non-const écrit (`T&`), la const lit (`const T&`) |
+| **Opérateur ternaire** | `cond ? a : b` — un `if/else` qui **renvoie une valeur** (expression) |
 
 ---
 
@@ -682,6 +1072,16 @@ void show(const char* msg) {
 18. Pourquoi `reinterpret_cast` est-il le plus dangereux des quatre ?
 19. À quoi servent `<limits>` et `<cmath>` quand on convertit des scalaires ?
 
+### Niveau 5 — Généricité et templates
+
+20. Pourquoi un template doit-il avoir son implémentation **dans le header** (et pas dans un `.cpp`) ?
+21. Quelle est la différence entre `typename` et `class` dans la déclaration d'un template ?
+22. Pourquoi `Array<T>` définit-il **deux** `operator[]` (un const, un non-const) ? Pourquoi la version non-const renvoie-t-elle `T&` plutôt que `T` ?
+23. Quelle est la différence entre instancier un *template* et instancier une *classe* ?
+24. Qu'est-ce qu'un foncteur, et qu'a-t-il de plus qu'un pointeur de fonction ?
+25. Pourquoi le sujet de l'ex02 (CPP06) interdit-il `typeid` alors que ce serait plus simple ? Qu'est-ce que la RTTI ?
+26. Réécris `int m; if (a < b) m = a; else m = b;` avec un opérateur ternaire. Quelle nuance entre « instruction » et « expression » cela illustre-t-il ?
+
 ---
 
-*Lexique C++ Partie 2 — sections exceptions et conversions complètes. Les chapitres templates / STL suivront. Bonne continuation, fducrot !* 🚀
+*Lexique C++ Partie 2 — exceptions, conversions et templates complets. Le chapitre STL (CPP08-09) suivra. Bonne continuation, fducrot !* 🚀
