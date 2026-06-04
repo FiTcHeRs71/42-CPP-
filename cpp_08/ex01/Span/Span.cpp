@@ -20,12 +20,9 @@ Span::~Span(void)
 
 Span::Span(const Span& to_copy)
 	:tab_size(to_copy.tab_size)
+	,tab(to_copy.tab)
 {
 	std::cout << "Span copy constructor called" << std::endl;
-	for (size_t i = 0; i < to_copy.tab.size(); i++)
-	{
-		this->tab.push_back(to_copy.tab[i]);
-	}
 }
 
 Span & Span::operator=(const Span& src)
@@ -33,10 +30,7 @@ Span & Span::operator=(const Span& src)
 	std::cout << "Span operator assignement(=) called" << std::endl;
 	if (this != &src)
 	{
-		for (size_t i = 0; i < src.tab.size(); i++)
-		{
-			this->tab.push_back(src.tab[i]);
-		}
+		this->tab = src.tab;
 	}
 	return (*this);
 }
@@ -76,24 +70,12 @@ int		Span::longestSpan(void)const
 int		Span::shortestSpan(void)const
 {
 	std::vector<int>	copytab;
-	int					result;
 
 
-	for(size_t i = 0; i < this->tab.size(); i++)
-	{
-		copytab.push_back(this->tab[i]);
-	}
+	if (this->tab.size() <= 1)
+		throw NoSpanException();
+	copytab = this->tab;
 	std::sort(copytab.begin(), copytab.end());
-		for (size_t i = 0; i < copytab.size(); i++)
-	{
-		std::cout << "apres sort : " << copytab[i] << std::endl;
-	}
 	std::adjacent_difference(copytab.begin(), copytab.end(), copytab.begin());
-	for (size_t i = 0; i < copytab.size(); i++)
-	{
-		std::cout << "apres adjacent diference : " << copytab[i] << std::endl;
-	}
-	result = *std::min_element(copytab.begin(), copytab.end());
-	std::cout << "result : " << result << std::endl;
-	return (result);
+	return (*std::min_element(copytab.begin(), copytab.end()));
 }
