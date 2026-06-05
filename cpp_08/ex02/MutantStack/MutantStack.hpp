@@ -1,8 +1,6 @@
 #ifndef MUTANTSTACK_HPP
 # define MUTANTSTACK_HPP
 
-#include <ios>
-#include <istream>
 # include <stack>
 # include <iostream>
 
@@ -21,7 +19,10 @@ class MutantStack : public std::stack<T>
 	typedef typename MutantStack<T>::container_type::iterator iterator;
 
 	/*===Member Function===*/
-
+	iterator	begin(void);
+	iterator	end(void);
 };
+
+# include "MutantStack.tpp"
 
 #endif /*MUTANTSTACK_HPP*/
