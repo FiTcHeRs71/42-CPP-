@@ -5,6 +5,7 @@
 # include <exception>
 # include <vector>
 
+
 class Span
 {
 	private:
@@ -27,9 +28,10 @@ class Span
 
 	/*===Member Function===*/
 	void	addNumber(int to_add);
-	void	addNumbers(unsigned int how_many_value);
+	template <typename It>
+	void	addRange(It first, It last);
 	int		shortestSpan(void)const;
-	int		longestSpan(void)const;
+	int		longestSpan(void)const; 
 
 	class	SpanFullException : public std::exception
 	{

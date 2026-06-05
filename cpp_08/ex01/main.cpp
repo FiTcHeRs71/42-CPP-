@@ -51,11 +51,14 @@ int	main(void)
 	}
 	SECTION("TEST 10 000");
 	{
-		Span sp = Span(10001);
+		Span sp = Span(10000);
 
 		try
 		{
-			sp.addNumbers(900);
+			for(int i = 0; i < sp.getTabSize(); i++)
+			{
+				sp.addRange()
+			}
 			std::cout << sp.shortestSpan() << std::endl;
 			std::cout << sp.longestSpan() << std::endl;
 		}

@@ -59,12 +59,12 @@ void	Span::addNumber(int to_add)
 		throw SpanFullException();
 }
 
-void	Span::addNumbers(unsigned int how_many_value)
+template <typename It>
+void	Span::addRange(It first, It last)
 {
-	if (how_many_value > this->tab_size)
+	if (this->tab.size() + std::distance(first, last) > this->tab_size)
 		throw SpanSizeTooShort();
-	srand(time(NULL));
-	this->tab.insert(tab.begin(), how_many_value, rand());
+	this->tab.insert(this->tab.end(), first, last);
 }
 
 int		Span::longestSpan(void)const
