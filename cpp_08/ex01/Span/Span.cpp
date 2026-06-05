@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <ctime>
 #include <iterator>
 #include <numeric>
 #include <vector>
@@ -19,8 +20,8 @@ Span::~Span(void)
 }
 
 Span::Span(const Span& to_copy)
-	:tab_size(to_copy.tab_size)
-	,tab(to_copy.tab)
+	:tab(to_copy.tab)
+	,tab_size(to_copy.tab_size)
 {
 	std::cout << "Span copy constructor called" << std::endl;
 }
@@ -56,7 +57,16 @@ void	Span::addNumber(int to_add)
 	}
 	else
 		throw SpanFullException();
-} 
+}
+
+void	Span::addNumbers(unsigned int how_many_value)
+{
+	if (how_many_value > this->tab_size)
+		throw SpanSizeTooShort();
+	srand(time(NULL));
+	this->tab.insert(tab.begin(), how_many_value, rand());
+}
+
 int		Span::longestSpan(void)const
 {
 	int	result;
@@ -71,11 +81,10 @@ int		Span::shortestSpan(void)const
 {
 	std::vector<int>	copytab;
 
-
 	if (this->tab.size() <= 1)
 		throw NoSpanException();
 	copytab = this->tab;
 	std::sort(copytab.begin(), copytab.end());
 	std::adjacent_difference(copytab.begin(), copytab.end(), copytab.begin());
-	return (*std::min_element(copytab.begin(), copytab.end()));
+	return (*std::min_element(copytab.begin() + 1, copytab.end()));
 }

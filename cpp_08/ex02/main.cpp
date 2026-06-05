@@ -21,7 +21,7 @@ int main(void)
 	MutantStack<int>::iterator it = mstack.begin();
 	std::cout << ".begin() -> " << *it << std::endl;
 	MutantStack<int>::iterator ite = mstack.end();
-	std::cout << ".end() -> " << *ite << std::endl; //point after the last value
+	//std::cout << ".end() -> " << *ite << std::endl; //point after the last value // unbihavior comportement
 
 	std::cout << "value of it before ++ -> " << *it << std::endl;
 	++it;

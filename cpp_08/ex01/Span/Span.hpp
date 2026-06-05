@@ -27,6 +27,7 @@ class Span
 
 	/*===Member Function===*/
 	void	addNumber(int to_add);
+	void	addNumbers(unsigned int how_many_value);
 	int		shortestSpan(void)const;
 	int		longestSpan(void)const;
 
@@ -35,7 +36,7 @@ class Span
 		public:
 			virtual const char *what() const throw()
 			{
-				return ("tab is already empty");
+				return ("tab is already full.");
 			}
 	};
 
@@ -44,10 +45,18 @@ class Span
 		public:
 			virtual const char *what() const throw()
 			{
-				return ("Tab is empty");
+				return ("Tab is empty.");
 			}
 	};
 
+		class	SpanSizeTooShort : public std::exception
+	{
+		public:
+			virtual const char *what() const throw()
+			{
+				return ("Span size is too short.");
+			}
+	};
 };
 
 #endif /*SPAN_HPP*/

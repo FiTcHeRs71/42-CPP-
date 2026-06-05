@@ -49,5 +49,20 @@ int	main(void)
 			std::cout << "/!\\Exception caught -> " << e.what() << std::endl;
 		}
 	}
+	SECTION("TEST 10 000");
+	{
+		Span sp = Span(10001);
+
+		try
+		{
+			sp.addNumbers(900);
+			std::cout << sp.shortestSpan() << std::endl;
+			std::cout << sp.longestSpan() << std::endl;
+		}
+		catch (std::exception &e)
+		{
+			std::cout << "/!\\Exception caught -> " << e.what() << std::endl;
+		}
+	}
 	return (0);
 }

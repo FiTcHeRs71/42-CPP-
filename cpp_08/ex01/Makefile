@@ -18,7 +18,7 @@ OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
  
 # Compiler and flags
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -Wreorder -std=c++98
  
 # Colors
 GREEN = \033[0;32m
