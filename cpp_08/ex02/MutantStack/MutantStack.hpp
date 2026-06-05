@@ -1,17 +1,14 @@
 #ifndef MUTANTSTACK_HPP
 # define MUTANTSTACK_HPP
 
-#include <stack>
+#include <ios>
+#include <istream>
+# include <stack>
+# include <iostream>
+
 template<class T>
-class MutantStack
+class MutantStack : public std::stack<T>
 {
-	private:
-
-	std::stack<T>
-
-	protected:
-	
-
 	public:
 
 	/*===Canonical Form===*/
@@ -20,11 +17,11 @@ class MutantStack
 	MutantStack(const MutantStack& to_copy);
 	MutantStack&operator=(const MutantStack& src);
 
-	/*===Getters & Setters===*/
-	
+	/*=== Typedef ===*/
+	typedef typename MutantStack<T>::container_type::iterator iterator;
 
 	/*===Member Function===*/
-	
+
 };
 
 #endif /*MUTANTSTACK_HPP*/
