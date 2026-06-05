@@ -59,14 +59,6 @@ void	Span::addNumber(int to_add)
 		throw SpanFullException();
 }
 
-template <typename It>
-void	Span::addRange(It first, It last)
-{
-	if (this->tab.size() + std::distance(first, last) > this->tab_size)
-		throw SpanSizeTooShort();
-	this->tab.insert(this->tab.end(), first, last);
-}
-
 int		Span::longestSpan(void)const
 {
 	int	result;

@@ -4,6 +4,7 @@
 # include <iostream>
 # include <exception>
 # include <vector>
+# include <iterator>
 
 
 class Span
@@ -28,8 +29,6 @@ class Span
 
 	/*===Member Function===*/
 	void	addNumber(int to_add);
-	template <typename It>
-	void	addRange(It first, It last);
 	int		shortestSpan(void)const;
 	int		longestSpan(void)const; 
 
@@ -59,6 +58,15 @@ class Span
 				return ("Span size is too short.");
 			}
 	};
+
+		template<typename It>
+	void	addRange(It first, It last)
+	{
+		if (this->tab.size() + std::distance(first, last) > this->tab_size)
+			throw SpanSizeTooShort();
+		this->tab.insert(this->tab.end(), first, last);
+	};
 };
+
 
 #endif /*SPAN_HPP*/

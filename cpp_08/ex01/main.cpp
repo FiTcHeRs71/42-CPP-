@@ -1,5 +1,7 @@
 #include "./Span/Span.hpp"
 #include <climits>
+#include <cstdlib>
+#include <ctime>
 #include <exception>
 #include <ostream>
 
@@ -7,6 +9,7 @@
 
 int	main(void)
 {
+	srand(time(NULL));
 	SECTION("TEST MAIN INTRA");
 	{
 		Span sp = Span(5);
@@ -55,10 +58,10 @@ int	main(void)
 
 		try
 		{
-			for(int i = 0; i < sp.getTabSize(); i++)
-			{
-				sp.addRange()
-			}
+			std::vector<int> v;
+			for (int i = 0; i < 10000; ++i)
+				v.push_back(rand());
+			sp.addRange(v.begin(), v.end());
 			std::cout << sp.shortestSpan() << std::endl;
 			std::cout << sp.longestSpan() << std::endl;
 		}
