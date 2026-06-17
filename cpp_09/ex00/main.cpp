@@ -1,4 +1,5 @@
-#include "BitcoinExchange/BitcoinExchange.hpp"
+#include "./include/bitcoin.hpp"
+#include <exception>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,7 +8,7 @@ int	main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
-		std::cerr << "Error\nUsage : ./btc <data.csv>" << std::endl;
+		std::cerr << "Error\nUsage : ./btc <>" << std::endl;
 		return (1);
 	}
 	std::ifstream	data("./data.csv");
@@ -23,6 +24,14 @@ int	main(int argc, char **argv)
 		data.close();
 		return (1);
 	}
-	
+	try
+	{
+		parse_infile(infile);
+
+	}
+	catch (std::exception &e)
+	{
+		std::cout << "/!\\exception caught " << e.what() << std::endl;
+	}
 	return (0);
 }

@@ -2,26 +2,22 @@
 # define SANDBOX_HPP
 
 #include <iostream>
+# include <vector>
 
 
-class student
+class bigint
 {
-private:
-	std::string _name;
-	int			_note;
+	private:
 
-public:
-	// Constructeur / Destructeur
-	student(void);
-	~student(void);
+	std::vector<int> _array
 
-	// Getters → pour LIRE un attribut privé
-	std::string getName(void);
-	int			getNote(void);
+	public:
 
-	// Setters → pour MODIFIER un attribut privé
-	void	setName(std::string name);
-	void	setNote(int note);
+	bigint();
+	~bigint();
+	bigint(const bigint &to_copy);
+	bigint &oprator=(const bigint &src);
+	
 };
 
 
