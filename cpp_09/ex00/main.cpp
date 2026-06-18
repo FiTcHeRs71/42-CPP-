@@ -1,4 +1,4 @@
-#include "./include/bitcoin.hpp"
+#include "BitcoinExchange/BitcoinExchange.hpp"
 #include <exception>
 #include <iostream>
 #include <fstream>
@@ -8,30 +8,16 @@ int	main(int argc, char **argv)
 {
 	if (argc != 2)
 	{
-		std::cerr << "Error\nUsage : ./btc <>" << std::endl;
+		std::cerr << "Error\nUsage : ./btc <input.txt>" << std::endl;
 		return (1);
 	}
-	std::ifstream	data("./data.csv");
-	std::ifstream	infile(argv[1]);
-	if (!data || !data.is_open() || !infile || !infile.is_open())
-	{
-		std::cerr << "Error : data/input not valid or could not be open" << std::endl;
-		return (1);
-	}
-	if (data.peek() == std::ifstream::traits_type::eof() || infile.peek() == std::ifstream::traits_type::eof())
-	{
-		std::cerr << "Error : data/input is empty or invalid" << std::endl;
-		data.close();
-		return (1);
-	}
+	BitcoinExchange	btc ();
 	try
 	{
-		parse_infile(infile);
-
+		btc.run(data, infile);
 	}
 	catch (std::exception &e)
 	{
-		std::cout << "/!\\exception caught " << e.what() << std::endl;
 	}
 	return (0);
 }
