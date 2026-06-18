@@ -6,18 +6,21 @@
 
 int	main(int argc, char **argv)
 {
+
 	if (argc != 2)
 	{
 		std::cerr << "Error\nUsage : ./btc <input.txt>" << std::endl;
 		return (1);
 	}
-	BitcoinExchange	btc ();
+	BitcoinExchange	btc;
 	try
 	{
-		btc.run(data, infile);
+		btc.parse("./data.csv", argv[1]);
+		//btc.run();
 	}
 	catch (std::exception &e)
 	{
+		std::cout << "/!\\ exception caught -> " << e.what() << std::endl;
 	}
 	return (0);
 }

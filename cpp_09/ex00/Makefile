@@ -5,17 +5,13 @@ NAME = btc
 OBJDIR = objs
 
 SRCS_MAIN = main.cpp
-BITDIR = src
 BITCOIN = BitcoinExchange
 
-SRCS_FILES = $(addprefix $(BITDIR)/, \
-	parse.cpp)
-
-SRCS_BIT = $(addprefix $(BITCOIN)/, \
-	BitcoinExchange.cpp)
+SRCS_FILES = $(addprefix $(BITCOIN)/, \
+	BitcoinExchange.cpp btc_utils.cpp)
 
 # Source files
-SRCS = $(SRCS_MAIN) $(SRCS_FILES) $(SRCS_BIT)
+SRCS = $(SRCS_MAIN) $(SRCS_FILES) 
  
 # Object files
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
