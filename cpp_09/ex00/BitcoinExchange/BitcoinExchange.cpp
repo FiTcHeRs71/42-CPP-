@@ -5,6 +5,8 @@
 #include <fstream>
 #include <ios>
 #include <iterator>
+#include <map>
+#include <sstream>
 #include <string>
 
 /*===Canonical Form===*/
@@ -63,9 +65,11 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 
 		strtrim(date);
 		strtrim(value);
-
+		std::stringstream str(value);
+		double val;
+		str >> val;
 		if (isValidDate(date) && isValidValue(value))
-			this->_database[date] = std::atol(value.c_str());
+			this->_database[date] = val;
 	}
 	for (std::string line; std::getline(inFile, line); )
 	{
@@ -90,9 +94,12 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 
 		if (isValidDate(date) && isValidValue(value))
 		{
-			std::iterator_traits<long>	it = std::lower_bound(this->_database.begin(), this->_database.end(), std::atol(date.c_str()));
+			std::stringstream str(value);
+			double val;
+			str >> val;
 
+			std::map<std::string, double>::iterator	it = this->_database.lower_bound(date);
+			std::cout << date << " => " << value << " = " << std::fixed(val * it->second, 2) << std::endl;
 		}
-
 	}
 }

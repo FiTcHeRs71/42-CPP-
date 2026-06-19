@@ -14,7 +14,7 @@ class BitcoinExchange
 {
 	private:
 
-	std::map<std::string, float> _database;
+	std::map<std::string, double> _database;
 
 	protected:
 
@@ -56,6 +56,6 @@ class BitcoinExchange
 
 void	strtrim(std::string &line);
 bool	isValidDate(const std::string &line);
-bool	isValidValue(std::string &line);
+bool	isValidValue(std::string &line); 
 
 #endif /*BITCOIN_EXCHANGE_HPP*/

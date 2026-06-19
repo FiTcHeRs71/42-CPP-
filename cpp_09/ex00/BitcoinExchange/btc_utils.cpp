@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <iterator>
+#include <sstream>
+#include <string>
 
 void	strtrim(std::string &line)
 {
@@ -85,7 +87,7 @@ bool	isValidValue(std::string &line)
 {
 	if (line.empty())
 	{
-		std::cerr << "Error: invalid value => " << line << std::endl;
+		std::cerr << "Error: empty value => " << line << std::endl;
 		return (false);
 	}
 	if (!std::for_each(line.begin(), line.end(), isdigit))
