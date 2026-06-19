@@ -56,6 +56,7 @@ class BitcoinExchange
 
 void	strtrim(std::string &line);
 bool	isValidDate(const std::string &line);
-bool	isValidValue(std::string &line); 
+bool	isValidValue(std::string &line);
+bool	isValidValueInput(std::string &line);
 
 #endif /*BITCOIN_EXCHANGE_HPP*/

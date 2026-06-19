@@ -89,7 +89,7 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 		strtrim(date);
 		strtrim(value);
 
-		if (isValidDate(date) && isValidValue(value))
+		if (isValidDate(date) && isValidValueInput(value))
 		{
 			std::stringstream str(value);
 			double val;

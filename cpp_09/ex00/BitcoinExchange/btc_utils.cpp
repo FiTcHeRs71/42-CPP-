@@ -85,20 +85,48 @@ bool isValidDate(const std::string &line)
 
 bool	isValidValue(std::string &line)
 {
-	std::stringstream str;
-	double value;
-	str >> value;
 	if (line.empty())
 	{
 		std::cerr << "Error: empty value => " << line << std::endl;
 		return (false);
 	}
-	if (!std::for_each(line.begin(), line.end(), isdigit))
+	std::stringstream str(line);
+	double value;
+	str >> value;
+	if (str.fail() || !str.eof())
 	{
-		std::cerr << "Error: invalid value => " << line << std::endl;
+		std::cerr << "Error: invalid number => " << line << std::endl;
 		return (false);
 	}
 	if (value > INT_MAX)
+	{
+		std::cerr << "Error: too large number => " << line << std::endl;
+		return (false);
+	}
+	if (value < 0)
+	{
+		std::cerr << "Error: not a positive number => " << line << std::endl;
+		return (false);
+	}
+	return (true);
+}
+
+bool	isValidValueInput(std::string &line)
+{
+	if (line.empty())
+	{
+		std::cerr << "Error: empty value => " << line << std::endl;
+		return (false);
+	}
+	std::stringstream str(line);
+	double value;
+	str >> value;
+	if (str.fail() || !str.eof())
+	{
+		std::cerr << "Error: invalid number => " << line << std::endl;
+		return (false);
+	}
+	if (value > 1000)
 	{
 		std::cerr << "Error: too large number => " << line << std::endl;
 		return (false);
