@@ -31,8 +31,7 @@ class BitcoinExchange
 	
 
 	/*===Member Function===*/
-	void	run(void);
-	void	parse(const std::string &data, const std::string &infile);
+	void	execute(const std::string &data, const std::string &infile);
 
 	/*===Exception===*/
 	class AccessInfile : public std::exception

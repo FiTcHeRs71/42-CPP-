@@ -32,7 +32,7 @@ BitcoinExchange & BitcoinExchange::operator=(const BitcoinExchange& src)
 }
 
 /*===Member Function===*/
-void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
+void	BitcoinExchange::execute(const std::string &data, const std::string &infile)
 {
 	std::ifstream	inFile(infile.c_str());
 	std::ifstream	inData(data.c_str());

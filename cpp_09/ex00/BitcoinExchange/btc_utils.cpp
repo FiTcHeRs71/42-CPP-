@@ -100,7 +100,7 @@ bool	isValidValue(std::string &line)
 	}
 	if (value > INT_MAX)
 	{
-		std::cerr << "Error: too large number => " << line << std::endl;
+		std::cerr << "Error: too large a number => " << line << std::endl;
 		return (false);
 	}
 	if (value < 0)

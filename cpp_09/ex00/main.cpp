@@ -15,12 +15,12 @@ int	main(int argc, char **argv)
 	BitcoinExchange	btc;
 	try
 	{
-		btc.parse("./data.csv", argv[1]);
-		//btc.run();
+		btc.execute("./data.csv", argv[1]);
 	}
 	catch (std::exception &e)
 	{
 		std::cout << "/!\\ exception caught -> " << e.what() << std::endl;
+		return (1);
 	}
 	return (0);
 }
