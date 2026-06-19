@@ -85,6 +85,9 @@ bool isValidDate(const std::string &line)
 
 bool	isValidValue(std::string &line)
 {
+	std::stringstream str;
+	double value;
+	str >> value;
 	if (line.empty())
 	{
 		std::cerr << "Error: empty value => " << line << std::endl;
@@ -95,12 +98,12 @@ bool	isValidValue(std::string &line)
 		std::cerr << "Error: invalid value => " << line << std::endl;
 		return (false);
 	}
-	if (std::atol(line.c_str()) > INT_MAX)
+	if (value > INT_MAX)
 	{
 		std::cerr << "Error: too large number => " << line << std::endl;
 		return (false);
 	}
-	if (std::atol(line.c_str()) < 0)
+	if (value < 0)
 	{
 		std::cerr << "Error: not a positive number => " << line << std::endl;
 		return (false);

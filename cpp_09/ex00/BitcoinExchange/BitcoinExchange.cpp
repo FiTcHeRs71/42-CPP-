@@ -8,6 +8,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <iomanip>
 
 /*===Canonical Form===*/
 BitcoinExchange::BitcoinExchange(void)
@@ -65,9 +66,11 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 
 		strtrim(date);
 		strtrim(value);
+
 		std::stringstream str(value);
 		double val;
 		str >> val;
+
 		if (isValidDate(date) && isValidValue(value))
 			this->_database[date] = val;
 	}
@@ -99,7 +102,7 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 			str >> val;
 
 			std::map<std::string, double>::iterator	it = this->_database.lower_bound(date);
-			std::cout << date << " => " << value << " = " << std::fixed(val * it->second, 2) << std::endl;
+			std::cout << date << " => " << value << std::fixed << std::setprecision(2) << (val * it->second) << std::endl;
 		}
 	}
 }
