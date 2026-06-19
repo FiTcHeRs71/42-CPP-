@@ -1,11 +1,8 @@
 #include "BitcoinExchange.hpp"
 #include <algorithm>
 #include <cstddef>
-#include <cstdlib>
 #include <fstream>
-#include <ios>
 #include <iterator>
-#include <map>
 #include <sstream>
 #include <string>
 #include <iomanip>
@@ -33,9 +30,6 @@ BitcoinExchange & BitcoinExchange::operator=(const BitcoinExchange& src)
 	}
 	return (*this);
 }
-
-/*===Getters & Setters===*/
-
 
 /*===Member Function===*/
 void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
@@ -102,7 +96,19 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 			str >> val;
 
 			std::map<std::string, double>::iterator	it = this->_database.lower_bound(date);
-			std::cout << date << " => " << value << std::fixed << std::setprecision(2) << (val * it->second) << std::endl;
+			if (it != this->_database.end() && it->first == date)
+			{
+				std::cout << date << " => " << value << " = " << std::fixed << std::setprecision(2) << (val * it->second) << std::endl;
+			}
+			else if (it == this->_database.begin())
+			{
+				std::cerr << "Error : No date to estimate the value =>" << date << std::endl;
+			}
+			else
+			{
+				--it;
+				std::cout << date << " => " << value << " = " << std::fixed << std::setprecision(2) << (val * it->second) << std::endl;
+			}
 		}
 	}
 }
