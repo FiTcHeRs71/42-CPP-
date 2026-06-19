@@ -64,7 +64,8 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 		strtrim(date);
 		strtrim(value);
 
-		this->_database[date] = std::atol(value.c_str());
+		if (isValidDate(date) && isValidValue(value))
+			this->_database[date] = std::atol(value.c_str());
 	}
 	for (std::string line; std::getline(inFile, line); )
 	{
@@ -87,6 +88,11 @@ void	BitcoinExchange::parse(const std::string &data, const std::string &infile)
 		strtrim(date);
 		strtrim(value);
 
-		isValidDate(date);
+		if (isValidDate(date) && isValidValue(value))
+		{
+			std::iterator_traits<long>	it = std::lower_bound(this->_database.begin(), this->_database.end(), std::atol(date.c_str()));
+
 		}
+
 	}
+}
