@@ -1,11 +1,11 @@
 # Program name
-NAME = btc
+NAME = RPN
 
 # Directories
 OBJDIR = objs
 
 SRCS_MAIN = main.cpp
-RPNDIR = RPN
+RPNDIR = rpn
 
 SRCS_FILES = $(addprefix $(RPNDIR)/, \
 	RPN.cpp)

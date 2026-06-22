@@ -1,7 +1,9 @@
 #ifndef RNP_HPP
 # define RNP_HPP
 
-#include <list>
+# include <list>
+#include <iostream>
+
 class RPN
 {
 	private:
@@ -23,7 +25,7 @@ class RPN
 	
 
 	/*===Member Function===*/
-	
+	void	run(std::string args);
 };
 
 #endif /*RNP_HPP*/

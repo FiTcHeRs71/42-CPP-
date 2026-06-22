@@ -56,8 +56,17 @@
 26. [Pourquoi un template vit dans le header](#-pourquoi-un-template-vit-dans-le-header)
 27. [Instanciation implicite vs explicite](#-instanciation-implicite-vs-explicite)
 
-**À venir**
-- Conteneurs, itérateurs et algorithmes (la STL — CPP08-09)
+**Conteneurs, itérateurs et algorithmes — la STL (CPP08-09)**
+28. [La STL — vue d'ensemble](#-la-stl--vue-densemble)
+29. [Les conteneurs séquentiels (vector, list, deque)](#-les-conteneurs-séquentiels-vector-list-deque)
+30. [Les adaptateurs de conteneur (stack, queue, priority_queue)](#-les-adaptateurs-de-conteneur-stack-queue-priority_queue)
+31. [Les conteneurs associatifs (map, set)](#-les-conteneurs-associatifs-map-set)
+32. [`std::pair` et l'entrée d'une map](#-stdpair-et-lentrée-dune-map)
+33. [Les itérateurs](#-les-itérateurs)
+34. [Le pattern `typename T::iterator` (types dépendants)](#-le-pattern-typename-titerator-types-dépendants)
+35. [Les algorithmes (`<algorithm>` et `<numeric>`)](#-les-algorithmes-algorithm-et-numeric)
+36. [Hériter d'un conteneur (MutantStack)](#-hériter-dun-conteneur-mutantstack)
+37. [Choisir le bon conteneur (la philosophie du CPP09)](#-choisir-le-bon-conteneur-la-philosophie-du-cpp09)
 
 **Annexes**
 - [Termes complémentaires](#-termes-complémentaires) (dont un **zoom sur l'opérateur ternaire**)
@@ -949,6 +958,456 @@ Utile quand la déduction est ambiguë ou quand tu veux un type précis.
 
 ---
 
+## 🏛️ La STL — vue d'ensemble
+
+📘 La **STL** (*Standard Template Library*) est la bibliothèque générique du C++ : un ensemble de **conteneurs** et d'**algorithmes** déjà écrits, **templatés** (donc valables pour n'importe quel type). C'est l'aboutissement de tout ce que tu as appris : la [généricité](#-la-généricité--le-problème) du CPP07 **mise en pratique à grande échelle**.
+
+Elle repose sur **trois piliers** qui s'emboîtent :
+
+| Pilier | Rôle | Exemples |
+|---|---|---|
+| **Conteneurs** | **stockent** les données | `vector`, `list`, `deque`, `map`, `stack`… |
+| **Itérateurs** | **parcourent** les conteneurs (le « pont ») | `begin()`, `end()` |
+| **Algorithmes** | **opèrent** sur les données *via* les itérateurs | `find`, `sort`, `max_element`… |
+
+### 🔑 L'idée géniale : le découplage
+
+Un algorithme **ne connaît pas** le conteneur sur lequel il travaille. Il ne parle qu'aux **itérateurs**. C'est pour ça que `std::find` marche **aussi bien** sur un `vector` que sur une `list` ou un `set` : il demande juste un `begin()` et un `end()`.
+
+```
+  Conteneurs  ──fournissent──►  Itérateurs  ◄──consomment──  Algorithmes
+  (vector…)                     (begin/end)                  (find, sort…)
+```
+
+🎨 **Métaphore** : pense à des **rails de train**. Le conteneur, c'est le **paysage** (ce qui est stocké) ; les itérateurs, ce sont les **rails** posés dessus ; l'algorithme, c'est le **train** qui roule sur les rails. Le train se fiche de savoir si le paysage est une montagne ou une plaine — tant qu'il y a des rails, il avance.
+
+🧠 **Mnémotechnique** : *« Conteneurs + Itérateurs + Algorithmes = STL. Les itérateurs sont la colle. »*
+
+🚀 **Contexte 42** : tout le **CPP08** (« Templated containers, iterators and algorithms ») et le **CPP09** (« STL ») reposent là-dessus. CPP08 t'apprend à **manipuler** la STL ; CPP09 t'apprend à **choisir** le bon outil pour un vrai problème.
+
+---
+
+## 📦 Les conteneurs séquentiels (vector, list, deque)
+
+📘 Un **conteneur séquentiel** range ses éléments dans un **ordre linéaire** (comme une file de personnes) : chaque élément a une position, du premier au dernier. Les trois à connaître en 42 :
+
+| Conteneur | Header | Structure interne | Force | Faiblesse |
+|---|---|---|---|---|
+| `std::vector<T>` | `<vector>` | tableau **contigu** en mémoire | accès direct `[i]` ultra-rapide, ajout en **fin** rapide | insertion/suppression **au milieu** lente |
+| `std::list<T>` | `<list>` | liste **doublement chaînée** | insertion/suppression **partout** rapide | **pas** d'accès `[i]`, parcours seulement |
+| `std::deque<T>` | `<deque>` | tableau par **blocs** | rapide aux **deux bouts** (avant **et** arrière), accès `[i]` | un peu plus lourde que `vector` |
+
+### 🎬 `std::vector` — le conteneur par défaut
+
+C'est celui que tu utilises **par défaut** quand tu hésites. Tableau dynamique qui grandit tout seul.
+
+```cpp
+std::vector<int> v;
+v.push_back(42);        // ajoute en fin
+v.push_back(7);
+std::cout << v[0];      // accès direct → 42
+std::cout << v.size();  // nombre d'éléments → 2
+v.insert(v.end(), 99);  // insère à une position (ici, la fin)
+```
+
+🚀 **Contexte 42 (CPP08 ex01 — `Span`)** : ton `Span` stocke ses nombres dans un `std::vector<int>`. `addNumber` fait un `push_back` ; `addRange` fait un `insert(tab.end(), first, last)` pour avaler tout un intervalle d'un coup.
+
+```cpp
+// Ton code Span — push_back tant qu'il reste de la place, sinon throw
+void Span::addNumber(int to_add) {
+    if (this->tab.size() < this->tab_size)
+        this->tab.push_back(to_add);
+    else
+        throw SpanFullException();
+}
+```
+
+### 🎬 `std::list` — la liste chaînée
+
+Pas d'accès `v[i]` : on la parcourt avec des [itérateurs](#-les-itérateurs). Imbattable pour insérer/retirer au milieu sans tout décaler.
+
+```cpp
+std::list<long> l;
+l.push_back(10);
+l.push_front(5);     // ← push_front : impossible sur un vector !
+l.pop_back();
+```
+
+🚀 **Contexte 42 (CPP09 ex01 — `RPN`)** : ta calculatrice polonaise inverse empile les opérandes dans un `std::list<long>`. (Un `std::stack` conviendrait aussi — voir [adaptateurs](#-les-adaptateurs-de-conteneur-stack-queue-priority_queue) et [choisir le bon conteneur](#-choisir-le-bon-conteneur-la-philosophie-du-cpp09).)
+
+### 🎬 `std::deque` — la double-ended queue
+
+Prononcé « *deck* ». Rapide à **ajouter/retirer aux deux extrémités**, tout en gardant l'accès `[i]`.
+
+```cpp
+std::deque<int> d;
+d.push_back(1);
+d.push_front(0);     // rapide aux DEUX bouts
+std::cout << d[1];   // accès direct possible
+```
+
+🚀 **Contexte 42 (CPP09 ex02 — `PmergeMe`)** : le sujet impose d'implémenter le **même tri** (Ford-Johnson / merge-insertion) sur **deux conteneurs différents** pour **comparer leurs performances** — typiquement un `std::vector` **et** un `std::deque`. Tout l'enjeu pédagogique : le **choix du conteneur** a un coût mesurable.
+
+🧠 **Mnémotechnique** : *« vector = tableau qui grandit · list = maillons qu'on recoud · deque = tableau ouvert aux deux bouts. »*
+
+---
+
+## 🥞 Les adaptateurs de conteneur (stack, queue, priority_queue)
+
+📘 Un **adaptateur de conteneur** n'est **pas** un nouveau conteneur : c'est une **interface restreinte** posée **par-dessus** un conteneur séquentiel existant. Il **cache** la plupart des opérations pour n'exposer qu'un **comportement précis**.
+
+| Adaptateur | Header | Comportement | Conteneur sous-jacent par défaut |
+|---|---|---|---|
+| `std::stack<T>` | `<stack>` | **LIFO** (dernier entré, premier sorti) | `std::deque` |
+| `std::queue<T>` | `<queue>` | **FIFO** (premier entré, premier sorti) | `std::deque` |
+| `std::priority_queue<T>` | `<queue>` | sort toujours le **plus grand** d'abord | `std::vector` |
+
+### 🎬 `std::stack` — la pile LIFO
+
+```cpp
+std::stack<int> s;
+s.push(1);          // empile
+s.push(2);
+std::cout << s.top(); // regarde le sommet → 2 (le dernier entré)
+s.pop();              // retire le sommet (NE renvoie rien !)
+std::cout << s.size();
+```
+
+⚠️ **Piège** : `pop()` **ne renvoie pas** l'élément retiré — il le détruit. Pour récupérer la valeur, tu fais `top()` **puis** `pop()`. (Choix de design lié à la sécurité face aux exceptions.)
+
+🎨 **Métaphore** : une **pile d'assiettes**. Tu ne peux poser (`push`) et reprendre (`pop`) **que celle du dessus** (`top`). Impossible de tirer une assiette du milieu.
+
+### 🔑 Le piège fondamental : pas d'itérateurs !
+
+Un adaptateur n'expose **pas** `begin()` / `end()`. Tu ne peux **pas** le parcourir avec un itérateur ni lui appliquer un [algorithme](#-les-algorithmes-algorithm-et-numeric) STL. C'est **voulu** : un adaptateur sert à *restreindre*, pas à explorer.
+
+🚀 **Contexte 42 (CPP08 ex02 — `MutantStack`)** : c'est exactement le **problème** que l'exercice te demande de résoudre. Un `std::stack` « normal » ne se parcourt pas ; tu fabriques un `MutantStack` qui, lui, **expose des itérateurs**. Voir [Hériter d'un conteneur](#-hériter-dun-conteneur-mutantstack).
+
+🧠 **Mnémotechnique** : *« Stack = LIFO, Queue = FIFO. Un adaptateur restreint : pas d'itérateurs. »*
+
+---
+
+## 🗺️ Les conteneurs associatifs (map, set)
+
+📘 Un **conteneur associatif** range ses éléments **triés par clé** (et non par ordre d'insertion). La recherche y est **rapide** (`O(log n)`, arbre binaire équilibré en interne), sans que tu aies à trier toi-même.
+
+| Conteneur | Header | Stocke | Clés en double ? |
+|---|---|---|---|
+| `std::map<K, V>` | `<map>` | des **paires** clé→valeur | ❌ non (clés uniques) |
+| `std::set<K>` | `<set>` | des **clés** seules (un ensemble) | ❌ non |
+| `std::multimap` / `std::multiset` | idem | idem | ✅ oui (doublons permis) |
+
+### 🎬 `std::map` — le dictionnaire clé → valeur
+
+C'est le conteneur « **dictionnaire** » : à chaque **clé** unique correspond **une valeur**.
+
+```cpp
+std::map<std::string, double> prix;
+prix["2011-01-03"] = 0.3;        // insertion / écriture par clé
+prix["2011-01-09"] = 0.32;
+std::cout << prix["2011-01-03"]; // accès par clé → 0.3
+```
+
+🔑 **La recherche : `find` membre, pas l'algorithme**. Un `map` a sa **propre** méthode `find()`, **plus rapide** que `std::find` (elle exploite l'arbre trié). Elle renvoie un [itérateur](#-les-itérateurs), ou `end()` si la clé est absente.
+
+```cpp
+std::map<std::string, double>::iterator it = prix.find("2011-01-03");
+if (it == prix.end())
+    std::cout << "date absente";
+else
+    std::cout << it->second;   // la VALEUR associée (voir std::pair plus bas)
+```
+
+⚠️ **Piège classique** : `prix["clé_inexistante"]` **ne renvoie pas une erreur** — il **crée** silencieusement l'entrée avec une valeur par défaut (`0.0` pour un `double`). Pour **tester** une présence sans créer, utilise `find()`, jamais `[]`.
+
+🚀 **Contexte 42 (CPP09 ex00 — `BitcoinExchange`)** : tu charges la base de prix dans un `std::map<std::string, double>` (date → taux). Pour une date demandée **absente** de la base, le sujet impose de prendre la date **inférieure la plus proche** : c'est là que `lower_bound()` / l'itération sur un map **trié** devient précieuse (le tri automatique par clé te sert directement).
+
+```cpp
+// Ton header BitcoinExchange — la base EST un map trié par date
+std::map<std::string, double> _database;
+```
+
+### 🎬 `std::set` — l'ensemble trié sans doublon
+
+Un `set` ne stocke **que des clés** (pas de valeur associée), garde tout **trié**, et **refuse les doublons** automatiquement.
+
+```cpp
+std::set<int> s;
+s.insert(3);
+s.insert(1);
+s.insert(3);          // ignoré : 3 est déjà là
+// s contient {1, 3}, triés
+```
+
+🧠 **Mnémotechnique** : *« map = dictionnaire (clé→valeur) · set = ensemble (clés seules) · tout est trié, recherche en log(n). »*
+
+---
+
+## 🔗 `std::pair` et l'entrée d'une map
+
+📘 Un `std::pair<A, B>` (header `<utility>`) est un **mini-objet à deux champs** : `.first` (de type `A`) et `.second` (de type `B`). C'est la brique de base d'une `map` : **chaque entrée d'une map est un `pair<const K, V>`**.
+
+```cpp
+std::pair<std::string, double> entry("2011-01-03", 0.3);
+std::cout << entry.first;    // "2011-01-03"  (la clé)
+std::cout << entry.second;   // 0.3           (la valeur)
+```
+
+### 🔑 Conséquence directe quand tu parcours une map
+
+Comme un élément de map **est** une paire, tu accèdes à la clé via `->first` et à la valeur via `->second` :
+
+```cpp
+std::map<std::string, double>::iterator it;
+for (it = prix.begin(); it != prix.end(); ++it)
+{
+    std::cout << it->first  << " => " << it->second << std::endl;
+    //           ↑ la clé              ↑ la valeur
+}
+```
+
+🎨 **Métaphore** : `it->first` et `it->second`, c'est le **recto/verso** d'une fiche cartonnée. Recto : le mot (la clé). Verso : sa définition (la valeur). L'itérateur te tend la fiche ; à toi de la retourner.
+
+🔧 **`std::make_pair`** construit une paire sans répéter les types :
+
+```cpp
+prix.insert(std::make_pair("2011-01-09", 0.32));   // équivaut à prix["2011-01-09"] = 0.32;
+```
+
+🧠 **Mnémotechnique** : *« first = clé, second = valeur. Une entrée de map est une paire. »*
+
+---
+
+## ➡️ Les itérateurs
+
+📘 Un **itérateur** est un objet qui **désigne une position** dans un conteneur et sait passer à la **suivante**. C'est une **généralisation du pointeur** : on le déréférence avec `*it` pour lire l'élément, et on avance avec `++it`.
+
+```cpp
+std::vector<int> v;
+v.push_back(10); v.push_back(20); v.push_back(30);
+
+std::vector<int>::iterator it;
+for (it = v.begin(); it != v.end(); ++it)
+    std::cout << *it << " ";   // 10 20 30   (*it = l'élément pointé)
+```
+
+### 🔑 `begin()` et `end()` — l'intervalle semi-ouvert `[begin, end)`
+
+- `begin()` pointe sur le **premier** élément.
+- `end()` pointe **juste après le dernier** — c'est une **sentinelle**, **pas** un élément valide. On ne le déréférence **jamais**.
+
+```
+ indices :   [0]   [1]   [2]
+ éléments:    10    20    30
+              ▲                 ▲
+            begin()           end()  ← "après le dernier", marqueur de fin
+```
+
+C'est pour ça que la boucle teste `it != end()` (et non `<=`) : on s'arrête **quand on atteint la sentinelle**.
+
+🧠 **Mnémotechnique** : *« begin pointe le premier, end pointe APRÈS le dernier. L'intervalle est `[begin, end)` — fermé à gauche, ouvert à droite. »*
+
+### 🔑 `*it` et `it->` — comme un pointeur
+
+| Écriture | Sens |
+|---|---|
+| `*it` | l'**élément** désigné |
+| `it->membre` | un membre de l'élément (raccourci de `(*it).membre`) |
+| `++it` | avancer à l'élément suivant |
+
+C'est volontairement **identique à la syntaxe des pointeurs** ([Partie 1](lexique_poo_cpp.md#-les-symboles--et--en-c)) : un itérateur **se comporte comme** un pointeur sur un élément.
+
+### 🔍 Les catégories d'itérateurs (culture)
+
+Tous les itérateurs n'offrent pas les mêmes pouvoirs — ça dépend du conteneur :
+
+| Catégorie | Peut… | Conteneurs |
+|---|---|---|
+| **Bidirectionnel** | `++it` **et** `--it` | `list`, `map`, `set` |
+| **Accès aléatoire** | `++`, `--`, **et `it + n`, `it[i]`** | `vector`, `deque` |
+
+C'est pourquoi `std::sort` marche sur un `vector` (accès aléatoire) mais **pas** sur une `list` (qui fournit sa propre méthode `.sort()`).
+
+### 🔍 La variante `const_iterator`
+
+Pour parcourir un conteneur **`const`** (lecture seule), on utilise un `const_iterator` : il interdit de modifier l'élément pointé. C'est la [const-correctness](lexique_poo_cpp.md#-les-deux-const-dans-une-signature-de-méthode) appliquée au parcours.
+
+```cpp
+std::vector<int>::const_iterator it;   // sur un vector const
+```
+
+🎨 **Métaphore** : un itérateur, c'est un **doigt** qui suit une ligne de texte. `begin()` = le doigt sur le premier mot ; `end()` = le doigt **dans le vide juste après le point final** ; `*it` = le mot sous le doigt ; `++it` = glisser au mot suivant.
+
+🚀 **Contexte 42 (CPP08)** : les itérateurs sont **le** thème du module. `easyfind` renvoie un `T::iterator` ; `Span::addRange` prend deux itérateurs `first`/`last` ; `MutantStack` doit **fabriquer** des itérateurs.
+
+---
+
+## 🏷️ Le pattern `typename T::iterator` (types dépendants)
+
+📘 Quand un template manipule un conteneur générique `T`, le type de son itérateur s'écrit `T::iterator`. Mais le compilateur a besoin du mot-clé **`typename`** devant, pour savoir que `T::iterator` est bien **un type** (et pas une variable statique, par exemple). On appelle ça un **type dépendant** (il *dépend* du paramètre `T`).
+
+```cpp
+template <typename T>
+typename T::iterator easyfind(T& container, int value)
+//  ↑ obligatoire : "T::iterator est un TYPE"
+{
+    typename T::iterator it;
+    it = std::find(container.begin(), container.end(), value);
+    if (it == container.end())
+        throw NotFoundException();
+    return it;
+}
+```
+
+### 🔑 Pourquoi `typename` ici précisément ?
+
+Tant que `T` n'est pas connu, le compilateur **ne peut pas deviner** ce qu'est `T::iterator`. Par défaut, il suppose que `T::quelquechose` est une **valeur**. Pour lui dire « non, c'est un **type** », tu ajoutes `typename`. C'est le **second usage** de `typename` annoncé dans le chapitre [`typename` vs `class`](#-typename-vs-class) — celui où `class` **ne marcherait pas**.
+
+⚠️ **Sans `typename`** → erreur de compilation cryptique du genre *« need 'typename' before T::iterator because T is a dependent scope »*. Dès que tu vois ce message, le réflexe est : ajoute `typename`.
+
+🚀 **Contexte 42 (CPP08 ex00 — `easyfind`)** : c'est **exactement** ton code. `easyfind` accepte n'importe quel conteneur `T` contenant des `int`, et renvoie un `typename T::iterator` vers la valeur trouvée (ou `throw` si absente). Le `typename` n'est **pas** décoratif : sans lui, ça ne compile pas.
+
+🧠 **Mnémotechnique** : *« `T::iterator` dépend de `T` → préviens le compilateur avec `typename`. »*
+
+---
+
+## ⚙️ Les algorithmes (`<algorithm>` et `<numeric>`)
+
+📘 Les **algorithmes** de la STL sont des **fonctions templates libres** qui opèrent sur un **intervalle d'itérateurs** `[first, last)`. Ils ne touchent **jamais** le conteneur directement — uniquement ses itérateurs. Résultat : **un seul** `std::sort` trie n'importe quel conteneur à accès aléatoire.
+
+### 🔍 Ceux que tu as croisés en 42
+
+| Algorithme | Header | Rôle | Renvoie |
+|---|---|---|---|
+| `std::find(b, e, val)` | `<algorithm>` | cherche `val` | un itérateur (ou `e` si absent) |
+| `std::sort(b, e)` | `<algorithm>` | trie sur place | rien |
+| `std::max_element(b, e)` | `<algorithm>` | itérateur sur le **max** | un itérateur |
+| `std::min_element(b, e)` | `<algorithm>` | itérateur sur le **min** | un itérateur |
+| `std::distance(b, e)` | `<iterator>` | **nombre** d'éléments entre deux itérateurs | un entier |
+| `std::adjacent_difference(b, e, dest)` | `<numeric>` | écrit les **écarts** entre voisins | un itérateur |
+
+### 🔑 L'idiome universel : `if (it == container.end())`
+
+La quasi-totalité des algorithmes de recherche **renvoient `end()` en cas d'échec** (impossible de renvoyer « rien »). D'où le réflexe :
+
+```cpp
+std::vector<int>::iterator it = std::find(v.begin(), v.end(), 42);
+if (it == v.end())
+    std::cout << "pas trouvé";
+else
+    std::cout << "trouvé : " << *it;
+```
+
+🧠 **Mnémotechnique** : *« Trouvé ? On compare à `end()`. `end()` = échec. »*
+
+### 🎬 Tout ça réuni — ton `Span::shortestSpan`
+
+Ton code combine **quatre** algorithmes pour trouver le plus petit écart entre deux nombres :
+
+```cpp
+int Span::shortestSpan(void) const
+{
+    std::vector<int> copytab;
+    if (this->tab.size() <= 1)
+        throw NoSpanException();
+    copytab = this->tab;
+    std::sort(copytab.begin(), copytab.end());                       // 1. on trie
+    std::adjacent_difference(copytab.begin(), copytab.end(),         // 2. écarts entre voisins
+                             copytab.begin());
+    return *std::min_element(copytab.begin() + 1, copytab.end());    // 3. le plus petit écart
+}
+```
+
+🔑 **Pourquoi `begin() + 1` ?** Après `adjacent_difference`, le **premier** élément reste la valeur d'origine (il n'a pas de voisin de gauche) — ce n'est **pas** un écart. On l'ignore en partant de `begin() + 1` (possible car le vector a un itérateur à **accès aléatoire**).
+
+Et ton `longestSpan` montre l'autre combo classique — `max_element` moins `min_element` :
+
+```cpp
+result = *std::max_element(tab.begin(), tab.end())
+       - *std::min_element(tab.begin(), tab.end());
+```
+
+⚠️ **Piège** : `max_element`/`min_element` renvoient un **itérateur**, pas la valeur. Tu dois le **déréférencer** avec `*` pour obtenir le nombre (d'où le `*std::max_element(...)`).
+
+🚀 **Contexte 42 (CPP08 ex01)** : `Span` est le terrain de jeu idéal — il te force à **chaîner** plusieurs algorithmes plutôt que d'écrire des boucles à la main. C'est l'esprit STL : *« décris le QUOI, la STL fournit le COMMENT. »*
+
+🧠 **Mnémotechnique** : *« Un algorithme parle aux itérateurs, jamais au conteneur. Il rend souvent un itérateur — déréférence-le. »*
+
+---
+
+## 🧬 Hériter d'un conteneur (MutantStack)
+
+📘 Comme un [adaptateur](#-les-adaptateurs-de-conteneur-stack-queue-priority_queue) ne fournit pas d'itérateurs, on peut **hériter** de `std::stack` pour lui en **ajouter**. C'est de l'[héritage](lexique_poo_cpp.md#-héritage-inheritance) (Partie 1) appliqué à un type de la STL.
+
+### 🔑 Le secret : le membre protégé `c`
+
+Tout adaptateur (`stack`, `queue`) garde son conteneur sous-jacent dans un attribut **`protected`** nommé **`c`**. Comme il est `protected`, une **classe fille** y a accès — et ce conteneur, lui, **a** des itérateurs.
+
+```cpp
+template <class T>
+class MutantStack : public std::stack<T>
+{
+public:
+    // le type d'itérateur du conteneur sous-jacent
+    typedef typename MutantStack<T>::container_type::iterator iterator;
+
+    iterator begin(void) { return this->c.begin(); }   // c = conteneur interne (protected)
+    iterator end(void)   { return this->c.end();   }
+};
+```
+
+### 🔑 Décortiquer le `typedef`
+
+```cpp
+typedef typename MutantStack<T>::container_type::iterator iterator;
+//      └──────┬─────┘ └──────────────┬──────────────────┘ └──┬──┘
+//      mot-clé type    chemin vers le type d'itérateur     nouveau nom court
+```
+
+- `container_type` est le type du conteneur interne (un `std::deque<T>` par défaut), exposé par `std::stack`.
+- `::iterator` est **son** type d'itérateur — un [type dépendant](#-le-pattern-typename-titerator-types-dépendants), d'où le **`typename`**.
+- Le `typedef` lui donne un **alias court**, `iterator`, pour ne plus réécrire toute la chaîne.
+
+🎨 **Métaphore** : `std::stack`, c'est une **boîte fermée** avec juste une fente sur le dessus (`push`/`pop`). En héritant, tu obtiens la clé d'une **trappe arrière** (`c`) qui donne sur le contenu rangé en ligne — tu peux enfin le **parcourir** du début à la fin.
+
+🚀 **Contexte 42 (CPP08 ex02 — `MutantStack`)** : c'est tout l'exercice. Tu transformes une pile aveugle en pile **parcourable**, sans réécrire la pile — juste en **exposant** son conteneur interne via `begin()`/`end()`. Tu peux alors écrire `for (it = mstack.begin(); it != mstack.end(); ++it)` ou même lui appliquer un [algorithme](#-les-algorithmes-algorithm-et-numeric).
+
+🧠 **Mnémotechnique** : *« Un adaptateur cache son conteneur dans `c` (protected). Hérite, et `c.begin()`/`c.end()` te rendent les itérateurs. »*
+
+---
+
+## 🧭 Choisir le bon conteneur (la philosophie du CPP09)
+
+📘 Le CPP08 t'apprend à **manipuler** la STL ; le CPP09 t'apprend à **choisir**. La vraie compétence n'est pas de connaître `vector` par cœur, mais de répondre à : *« pour CE problème, quel conteneur ? »* Un mauvais choix **fonctionne** mais peut être **lent** ou **maladroit**.
+
+### 🔍 Tableau de décision
+
+| Ton besoin | Conteneur conseillé | Pourquoi |
+|---|---|---|
+| Accès direct par indice `[i]`, ajout en fin | `std::vector` | contigu, `[i]` instantané |
+| Insérer/retirer souvent **au milieu** | `std::list` | pas de décalage |
+| Ajouter/retirer aux **deux bouts** | `std::deque` | optimisé recto-verso |
+| Associer une **clé** à une **valeur**, recherche rapide | `std::map` | trié, `O(log n)` |
+| Garder des éléments **uniques et triés** | `std::set` | doublons refusés |
+| Comportement **LIFO** strict (pile) | `std::stack` | interface volontairement réduite |
+| Comportement **FIFO** strict (file) | `std::queue` | idem |
+
+### 🚀 Les choix de tes exercices CPP09
+
+| Exercice | Conteneur | Raison du choix |
+|---|---|---|
+| **ex00 `BitcoinExchange`** | `std::map<std::string, double>` | besoin d'associer **date → taux** et de retrouver la date **la plus proche** → tri automatique par clé indispensable |
+| **ex01 `RPN`** | `std::list<long>` (ou `std::stack`) | une calculatrice polonaise inverse **empile/dépile** des opérandes → comportement de pile |
+| **ex02 `PmergeMe`** | `std::vector` **et** `std::deque` | le sujet impose **deux** conteneurs pour **comparer** leurs perfs sur le même tri |
+
+⚠️ **Le piège du CPP09** : presque tout « marche » avec un `vector`. Mais le sujet **évalue ton jugement** : utiliser un `map` là où un `map` s'impose, choisir deux conteneurs *vraiment* différents pour `PmergeMe`. Le bon réflexe : pars du **comportement** voulu (clé/valeur ? LIFO ? accès aléatoire ?), pas de ton conteneur préféré.
+
+🎨 **Métaphore** : la STL est une **caisse à outils**. Un `vector`, c'est le **tournevis universel** — il dépanne presque partout. Mais on ne plante pas un clou avec un tournevis : pour une recherche par clé, le `map` est le **bon** outil. Choisir, c'est ça l'ingénierie.
+
+🧠 **Mnémotechnique** : *« Pars du comportement, pas du conteneur. Clé→valeur = map · pile = stack · accès direct = vector. »*
+
+---
+
 ## 📚 Termes complémentaires
 
 ### 💡 Zoom — l'opérateur ternaire `? :`
@@ -1036,6 +1495,26 @@ int r = a > b ? (a > c ? a : c) : (b > c ? b : c);
 | **`.tpp`** | Fichier d'implémentation d'un template, inclus à la fin du `.hpp` (jamais compilé seul) |
 | **Double `operator[]`** | Paire const/non-const : la non-const écrit (`T&`), la const lit (`const T&`) |
 | **Opérateur ternaire** | `cond ? a : b` — un `if/else` qui **renvoie une valeur** (expression) |
+| **STL** | *Standard Template Library* : conteneurs + itérateurs + algorithmes templatés |
+| **Conteneur** | Objet qui **stocke** une collection d'éléments (`vector`, `list`, `map`…) |
+| **Conteneur séquentiel** | Éléments en ordre linéaire : `vector`, `list`, `deque` |
+| **Conteneur associatif** | Éléments **triés par clé**, recherche `O(log n)` : `map`, `set` |
+| **Adaptateur de conteneur** | Interface restreinte sur un conteneur : `stack` (LIFO), `queue` (FIFO) ; **pas** d'itérateurs |
+| **`std::vector`** | Tableau dynamique contigu ; accès `[i]` rapide, ajout en fin |
+| **`std::list`** | Liste doublement chaînée ; insertion partout, pas d'accès `[i]` |
+| **`std::deque`** | Tableau ouvert aux deux bouts ; `push_front` **et** `push_back` rapides |
+| **`std::map`** | Dictionnaire clé→valeur, trié, clés uniques |
+| **`std::set`** | Ensemble trié de clés uniques (sans valeur associée) |
+| **`std::stack`** | Pile LIFO ; `push`/`top`/`pop` (⚠️ `pop` ne renvoie rien) |
+| **`std::pair`** | Couple `.first` / `.second` ; brique d'une entrée de map |
+| **Itérateur** | Objet « pointeur généralisé » désignant une position ; `*it`, `++it` |
+| **`begin()` / `end()`** | Premier élément / **après** le dernier (sentinelle) → intervalle `[begin, end)` |
+| **`const_iterator`** | Itérateur de lecture seule (parcours d'un conteneur `const`) |
+| **Type dépendant** | Type qui dépend d'un paramètre template (`T::iterator`) → exige `typename` |
+| **Algorithme STL** | Fonction template opérant sur `[first, last)` (`find`, `sort`, `min/max_element`…) |
+| **`std::find`** | Cherche une valeur ; renvoie un itérateur (ou `end()` si absent) |
+| **Idiome `== end()`** | Façon standard de tester l'échec d'une recherche STL |
+| **Membre `c`** | Conteneur sous-jacent (`protected`) d'un adaptateur ; clé du MutantStack |
 
 ---
 
@@ -1082,6 +1561,18 @@ int r = a > b ? (a > c ? a : c) : (b > c ? b : c);
 25. Pourquoi le sujet de l'ex02 (CPP06) interdit-il `typeid` alors que ce serait plus simple ? Qu'est-ce que la RTTI ?
 26. Réécris `int m; if (a < b) m = a; else m = b;` avec un opérateur ternaire. Quelle nuance entre « instruction » et « expression » cela illustre-t-il ?
 
+### Niveau 6 — La STL (CPP08-09)
+
+27. Quels sont les **trois piliers** de la STL, et pourquoi dit-on que les **itérateurs** sont la « colle » ?
+28. Quand préférer un `std::list` à un `std::vector` ? Et un `std::deque` ?
+29. Pourquoi un `std::stack` ne se parcourt-il pas avec un itérateur ? Comment le `MutantStack` contourne-t-il ça (rôle du membre `c`) ?
+30. Quelle est la différence entre `std::map` et `std::set` ? Pourquoi tester une clé avec `find()` plutôt qu'avec `operator[]` ?
+31. Que désignent `it->first` et `it->second` quand on parcourt une `map` ?
+32. Que pointe `end()` exactement ? Pourquoi la boucle teste-t-elle `it != end()` et pas `<=` ?
+33. Pourquoi faut-il écrire `typename T::iterator` et pas seulement `T::iterator` dans un template ?
+34. Que renvoie `std::find` en cas d'échec ? Et `std::max_element` en cas de succès (valeur ou itérateur) ?
+35. Pour `BitcoinExchange`, `RPN` et `PmergeMe`, quel conteneur choisirais-tu et **pourquoi** ?
+
 ---
 
-*Lexique C++ Partie 2 — exceptions, conversions et templates complets. Le chapitre STL (CPP08-09) suivra. Bonne continuation, fducrot !* 🚀
+*Lexique C++ Partie 2 — exceptions, conversions, templates **et STL** complets. Tu as maintenant tout le vocabulaire du CPP05 au CPP09. Bonne continuation, fducrot !* 🚀
