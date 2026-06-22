@@ -1,8 +1,7 @@
 #include "./RPN.hpp"
-#include <algorithm>
-#include <iterator>
 #include <iostream>
-#include <sstream>
+#include <cctype>
+
 
 /*===Canonical Form===*/
 RPN::RPN(void)
@@ -30,19 +29,46 @@ RPN & RPN::operator=(const RPN& src)
 
 void	RPN::run(std::string args)
 {
-	long num;
-
 	for (int i = 0; args[i]; i++)
 	{
-		if (std::isdigit(args[i]))
+		if (args[i] == ' ')
+			continue;
+		else if (std::isdigit(args[i]))
 		{
-			std::stringstream ss;
-			ss << args[i];
-			ss >> num;
-			this->_list.push_back(num);
-			std::cout << "List elements: ";
-			std::copy(this->_list.begin(), this->_list.end(), std::ostream_iterator<long>(std::cout, " "));
-			std::cout << std::endl;
+			this->_list.push(static_cast<double>(args[i] - '0'));
 		}
+		else if (args[i] == '+' || args[i] == '-' || args[i] == '*' || args[i] == '/')
+		{
+			double  a = popVal();
+			double  b = popVal();
+			switch (args[i])
+			{
+				case '+' : this->_list.push(b + a); break;
+				case '-' : this->_list.push(b - a); break;
+	    		case '*' : this->_list.push(b * a); break;
+				case '/' :
+					if (a == 0)
+						throw DivisionByZero();
+				this->_list.push(b / a);
+				break;
+			}
+		}
+		else
+			throw InvalidToken();
 	}
+	if (this->_list.size() != 1)
+		throw InvalidExpression();
+	std::cout << this->_list.top() << std::endl;
+  }
+
+
+double	RPN::popVal(void)
+{
+	double	element_stack;
+
+	if (this->_list.empty())
+		throw InvalidStackSize();
+	element_stack = this->_list.top();
+	this->_list.pop();
+	return (element_stack);
 }

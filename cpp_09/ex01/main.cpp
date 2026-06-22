@@ -1,4 +1,5 @@
 #include "./rpn/RPN.hpp"
+#include <exception>
 #include <iostream>
 
 int	main(int argc, char **argv)
@@ -9,6 +10,14 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	RPN rpn;
-	rpn.run(argv[1]);
+	try
+	{
+		rpn.run(argv[1]);
+	}
+	catch (std::exception &e)
+	{
+		std::cout << "/!\\ exception caught -> " << e.what() << std::endl;
+		return (1);
+	}
 	return (0);
 }

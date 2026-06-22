@@ -1,14 +1,15 @@
 #ifndef RNP_HPP
 # define RNP_HPP
 
-# include <list>
+#include <exception>
 #include <iostream>
+#include <stack>
 
 class RPN
 {
 	private:
 
-	std::list<long>	_list;
+	std::stack<double>	_list;
 
 	protected:
 	
@@ -26,6 +27,41 @@ class RPN
 
 	/*===Member Function===*/
 	void	run(std::string args);
+	double	popVal(void);
+
+	/*===Exception===*/
+	class	InvalidToken : public std::exception
+	{
+		public:
+		virtual const char *what() const throw()
+		{
+			return ("Invalid Token");
+		}
+	};
+	class	DivisionByZero : public std::exception
+	{
+		public:
+		virtual const char *what() const throw()
+		{
+			return ("Division by zero");
+		}
+	};
+	class	InvalidStackSize : public std::exception
+	{
+		public:
+		virtual const char *what() const throw()
+		{
+			return ("Invalid size");
+		}
+	};
+	class	InvalidExpression : public std::exception
+	{
+		public:
+		virtual const char *what() const throw()
+		{
+			return ("Invalid expression");
+		}
+	};
 };
 
 #endif /*RNP_HPP*/
