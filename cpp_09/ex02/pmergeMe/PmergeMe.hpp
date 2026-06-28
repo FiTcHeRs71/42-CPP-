@@ -13,10 +13,8 @@ class PmergeMe
 	private:
 
 	std::vector<long>					_vector;
-	std::vector<std::pair<long, long> >	_pair;
 	std::deque<long>					_deque;
-	bool								_hasStraggler;
-	long								_straggler;
+
 
 	protected:
 	
