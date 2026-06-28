@@ -35,6 +35,12 @@ PmergeMe & PmergeMe::operator=(const PmergeMe& src)
 		return (*this);
 }
 
+/*===Getters & Setters===*/
+size_t	PmergeMe::getSizeOfVector(void)const
+{
+	return (this->_vector.size());
+}
+
 void	PmergeMe::solve(int argc, char **argv)
 {
 	for (int i = 1; i < argc; i++)
@@ -174,4 +180,5 @@ void	PmergeMe::sortVector(size_t blockSize)
 	for (size_t i = nbBlocks * blockSize; i < this->_vector.size(); i++)
 		sorted.push_back(this->_vector[i]);
 	this->_vector = sorted;
+	gettimeofday(&this->end_vector, NULL);
 }

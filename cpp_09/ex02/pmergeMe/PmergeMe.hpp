@@ -1,25 +1,32 @@
 #ifndef PMERGEME_HPP
 # define PMERGEME_HPP
 
+#include <bits/types/struct_timeval.h>
+#include <cstddef>
 #include <deque>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 #include <iostream>
+#include <sys/time.h>
 
 class PmergeMe
 {
 	private:
 
-	std::vector<long>					_vector;
-	std::deque<long>					_deque;
+	std::vector<long>	_vector;
+	std::deque<long>	_deque;
 
 
 	protected:
 	
 
 	public:
+
+	struct timeval	start_time;
+	struct timeval	end_vector;
+	struct timeval	end_dque;
 
 	/*===Canonical Form===*/
 	PmergeMe(void);
@@ -28,7 +35,7 @@ class PmergeMe
 	PmergeMe&operator=(const PmergeMe& src);
 
 	/*===Getters & Setters===*/
-	
+	size_t	getSizeOfVector(void)const;
 
 	/*===Member Function===*/
 	void	solve(int argc, char **args);

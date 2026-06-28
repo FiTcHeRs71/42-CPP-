@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PmergeMe — Visualizer Ford-Johnson</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#2d3440;
+    --txt:#c9d1d9; --dim:#8b949e; --accent:#58a6ff;
+    --win:#1f6feb;          /* mainchain / gagnant */
+    --winbg:#10243e;
+    --los:#d29922;          /* pend / perdant     */
+    --losbg:#3a2c0a;
+    --queue:#f778ba;        /* queue comparée     */
+    --lo:#3fb950; --hi:#f85149; --mid:#a371f7; --ins:#e3b341;
+    --leftover:#30363d;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--txt);
+    font-family:"SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;
+    font-size:14px;line-height:1.5;
+  }
+  header{
+    padding:14px 20px;border-bottom:1px solid var(--line);
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  }
+  header h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.3px}
+  header .sub{color:var(--dim);font-size:12px}
+  .controls{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  input[type=text]{
+    background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    padding:8px 10px;border-radius:6px;font-family:inherit;font-size:13px;width:320px;
+  }
+  button{
+    background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    padding:8px 12px;border-radius:6px;font-family:inherit;font-size:13px;cursor:pointer;
+    transition:background .12s,border-color .12s;
+  }
+  button:hover:not(:disabled){background:#283041;border-color:var(--accent)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--win);border-color:var(--win);color:#fff;font-weight:600}
+  button.primary:hover{background:#388bfd}
+  .err{color:var(--hi);font-size:12px}
+  main{display:grid;grid-template-columns:240px 1fr 300px;gap:0;min-height:60vh}
+  .col{padding:16px 18px;border-right:1px solid var(--line);overflow:auto}
+  .col:last-child{border-right:none}
+  .col h2{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:0 0 12px}
+  .col h2:not(:first-child){margin-top:22px}
+
+  /* --- recursion stack --- */
+  .frame{padding:6px 9px;border-radius:5px;margin-bottom:5px;border:1px solid var(--line);background:var(--panel)}
+  .frame.active{border-color:var(--accent);background:var(--panel2)}
+  .frame .bs{color:var(--accent);font-weight:600}
+  .frame .lvl{color:var(--dim);font-size:11px}
+
+  /* --- center vector --- */
+  .stage{display:flex;flex-direction:column;gap:18px}
+  .levelbadge{display:inline-block;padding:3px 10px;border-radius:20px;background:var(--panel2);
+    border:1px solid var(--line);color:var(--accent);font-size:12px}
+  .vecrow{display:flex;gap:5px;flex-wrap:wrap;align-items:flex-end}
+  .block{display:flex;gap:2px;padding:5px;border-radius:7px;border:1px dashed var(--line);position:relative}
+  .block.win{border-color:var(--win);background:var(--winbg)}
+  .block.los{border-color:var(--los);background:var(--losbg)}
+  .block .tag{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--dim);white-space:nowrap}
+  .cell{
+    min-width:34px;height:38px;display:flex;align-items:center;justify-content:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:5px;font-size:13px;
+    transition:transform .1s,background .1s,border-color .1s;
+  }
+  .cell.queue{border-color:var(--queue);color:var(--queue);font-weight:700;box-shadow:0 0 0 1px var(--queue)}
+  .cell.leftover{background:transparent;border-style:dotted;color:var(--dim)}
+  .cell.lo{border-color:var(--lo);box-shadow:0 0 0 1px var(--lo)}
+  .cell.hi{border-color:var(--hi);box-shadow:0 0 0 1px var(--hi)}
+  .cell.mid{border-color:var(--mid);box-shadow:0 0 0 2px var(--mid);transform:translateY(-3px)}
+  .cell.ins{border-color:var(--ins);background:#3a3210;color:var(--ins);font-weight:700}
+
+  /* result chain */
+  .chainwrap{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--panel)}
+  .chain{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+  .ptr{font-size:11px;color:var(--dim);margin-top:4px}
+
+  /* --- right panel: pend/main + jacobsthal --- */
+  .pairlist{display:flex;flex-direction:column;gap:5px}
+  .pair{display:flex;align-items:center;gap:8px;font-size:12px}
+  .chip{min-width:30px;text-align:center;padding:3px 6px;border-radius:5px;border:1px solid var(--line)}
+  .chip.win{background:var(--winbg);border-color:var(--win);color:#9cc7ff}
+  .chip.los{background:var(--losbg);border-color:var(--los);color:#e8c879}
+  .chip.cur{box-shadow:0 0 0 2px var(--accent)}
+  .arrow{color:var(--dim)}
+  .jacrow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .jac{padding:3px 8px;border-radius:5px;border:1px solid var(--line);background:var(--panel);font-size:12px}
+  .jac.used{border-color:var(--mid);color:var(--mid)}
+  .orderrow{display:flex;gap:4px;flex-wrap:wrap}
+  .ord{padding:3px 7px;border-radius:5px;border:1px solid var(--line);background:var(--panel);font-size:12px;color:var(--dim)}
+  .ord.cur{border-color:var(--ins);color:var(--ins);font-weight:700}
+  .ord.done{opacity:.45}
+
+  /* --- footer log + nav --- */
+  footer{border-top:1px solid var(--line);padding:14px 20px;display:flex;flex-direction:column;gap:10px}
+  .log{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:12px 14px;min-height:46px;font-size:13px}
+  .log .phase{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-right:10px}
+  .nav{display:flex;gap:10px;align-items:center}
+  .nav .count{color:var(--dim);font-size:12px;margin-left:auto}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--dim);padding:0 20px 14px}
+  .legend span{display:inline-flex;align-items:center;gap:5px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+  .muted{color:var(--dim)}
+  code{background:var(--panel2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>PmergeMe — Ford-Johnson par blocs</h1>
+  <span class="sub">miroir fidèle de <code>sortVector()</code> · 7 étapes · récursion · Jacobsthal · recherche binaire bornée</span>
+</header>
+
+<div class="controls">
+  <input type="text" id="input" value="5 4 3 2 1 9 8 7 6" placeholder="ex: 5 4 3 2 1 9 8 7 6">
+  <button class="primary" id="run">▶ Lancer</button>
+  <button id="auto">⏯ Lecture auto</button>
+  <span class="err" id="err"></span>
+</div>
+
+<main>
+  <div class="col" id="col-stack">
+    <h2>Pile de récursion</h2>
+    <div id="stack"></div>
+  </div>
+
+  <div class="col" id="col-stage">
+    <div class="stage">
+      <div><span class="levelbadge" id="levelbadge">—</span></div>
+      <div>
+        <h2>_vector (regroupé en blocs)</h2>
+        <div class="vecrow" id="vecrow"></div>
+      </div>
+      <div id="chainbox" style="display:none">
+        <h2>result — chaîne d'insertion (queues des blocs)</h2>
+        <div class="chainwrap"><div class="chain" id="chain"></div><div class="ptr" id="searchinfo"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" id="col-right">
+    <h2>mainchain 🟦 / pend 🟧</h2>
+    <div class="pairlist" id="pairlist"><span class="muted">en attente…</span></div>
+    <h2>Jacobsthal</h2>
+    <div class="jacrow" id="jacrow"><span class="muted">—</span></div>
+    <h2>order — ordre d'insertion</h2>
+    <div class="orderrow" id="orderrow"><span class="muted">—</span></div>
+  </div>
+</main>
+
+<div class="legend">
+  <span><i class="sw" style="border-color:var(--queue)"></i> queue comparée</span>
+  <span><i class="sw" style="background:var(--winbg);border-color:var(--win)"></i> mainchain (gagnant)</span>
+  <span><i class="sw" style="background:var(--losbg);border-color:var(--los)"></i> pend (perdant)</span>
+  <span><i class="sw" style="border-color:var(--lo)"></i> low</span>
+  <span><i class="sw" style="border-color:var(--hi)"></i> high (borné au partenaire)</span>
+  <span><i class="sw" style="border-color:var(--mid)"></i> medium testé</span>
+  <span><i class="sw" style="background:#3a3210;border-color:var(--ins)"></i> insertion</span>
+</div>
+
+<footer>
+  <div class="log" id="log"><span class="phase">prêt</span>Tape une séquence et clique « Lancer ».</div>
+  <div class="nav">
+    <button id="first">⏮ Début</button>
+    <button id="prev">◀ Précédent</button>
+    <button id="next">Suivant ▶</button>
+    <button id="last">Fin ⏭</button>
+    <span class="count" id="count">0 / 0</span>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. MOTEUR — réimplémente sortVector() en enregistrant des
+      "events" (snapshots). Mêmes noms que ton C++.
+   ============================================================ */
+
+let vec = [];          // == this->_vector
+let events = [];       // suite de snapshots à visualiser
+
+function snap(extra){
+  // clone profond minimal de l'état affichable
+  const e = Object.assign({
+    vec: vec.slice(),
+    blockSize: 1, level: 0, nbBlocks: 0, phase: "", msg: "",
+    blocks: null,        // {win:Set, los:Set} par index de bloc (start)
+    pairs: null,         // [[startA,startB,queueA,queueB,swapped]]
+    mainchain: null, pend: null,
+    order: null, orderIdx: -1,
+    jac: null, jacUsed: -1,
+    result: null,        // tableau de starts
+    search: null,        // {f, partnerStart, low, high, mid, value, insertedAt}
+    swapHi: null,        // indices vec surlignés pour un swap
+    curBlockSize: 1,
+  }, extra);
+  events.push(e);
+}
+
+function run(values){
+  vec = values.slice();
+  events = [];
+  snap({phase:"init", level:0, blockSize:1, nbBlocks: vec.length,
+        msg:`Entrée : ${values.length} éléments. On va voir _vector comme des blocs de taille 1, puis 2, 4, 8…`});
+  sortVector(1, 0);
+  snap({phase:"done", level:0, blockSize:1, nbBlocks: vec.length,
+        msg:`✅ Trié : [ ${vec.join(", ")} ]`});
+}
+
+function sortVector(blockSize, level){
+  const nbBlocks = Math.floor(vec.length / blockSize);
+
+  if(nbBlocks < 2){
+    snap({phase:"base", level, blockSize, nbBlocks,
+      msg:`Niveau ${level} · blockSize=${blockSize} · nbBlocks=${nbBlocks} < 2 → cas de base, rien à apparier. On remonte.`});
+    return;
+  }
+
+  snap({phase:"enter", level, blockSize, nbBlocks,
+    msg:`Niveau ${level} · blockSize=${blockSize} · nbBlocks=${nbBlocks}. On regarde _vector comme ${nbBlocks} blocs de ${blockSize}.`});
+
+  // --- ÉTAPE 1 : appariement des blocs deux par deux ---
+  for(let b=0; b+1 < nbBlocks; b+=2){
+    const startA = b*blockSize, startB = (b+1)*blockSize;
+    const last_a = vec[startA + blockSize - 1];
+    const last_b = vec[startB + blockSize - 1];
+    snap({phase:"pair", level, blockSize, nbBlocks,
+      pairs:[[startA,startB,last_a,last_b,false]],
+      msg:`Paire de blocs (${b},${b+1}) : on compare les queues  ${last_a}  vs  ${last_b}.`});
+    if(last_a > last_b){
+      const hi=[];
+      for(let k=0;k<blockSize;k++){
+        const i=startA+k, j=startB+k;
+        const t=vec[i]; vec[i]=vec[j]; vec[j]=t;
+        hi.push(i,j);
+      }
+      snap({phase:"swap", level, blockSize, nbBlocks, swapHi:hi,
+        pairs:[[startA,startB,last_b,last_a,true]],
+        msg:`${last_a} > ${last_b} → on échange les DEUX blocs entiers. Le gagnant (plus grande queue) passe à droite.`});
+    } else {
+      snap({phase:"pair", level, blockSize, nbBlocks,
+        pairs:[[startA,startB,last_a,last_b,false]],
+        msg:`${last_a} ≤ ${last_b} → déjà dans le bon ordre, pas de swap.`});
+    }
+  }
+
+  // --- ÉTAPE 2 : récursion ---
+  snap({phase:"recurse-down", level, blockSize, nbBlocks,
+    msg:`On trie récursivement les gagnants entre eux : blockSize ${blockSize} → ${blockSize*2}.`});
+  sortVector(blockSize*2, level+1);
+  snap({phase:"recurse-up", level, blockSize, nbBlocks,
+    msg:`Retour au niveau ${level}. Les paires sont maintenant ordonnées par la queue du gagnant.`});
+
+  // --- ÉTAPE 3 : mainchain (gagnants, impairs) / pend (perdants, pairs) ---
+  const mainchain=[], pend=[];
+  for(let p=0;p<nbBlocks;p++){
+    const start=p*blockSize;
+    if(p%2===0) pend.push(start); else mainchain.push(start);
+  }
+  snap({phase:"split", level, blockSize, nbBlocks,
+    blocks: blocksFrom(mainchain,pend),
+    mainchain:mainchain.slice(), pend:pend.slice(),
+    msg:`Séparation : indices pairs = perdants (pend 🟧), impairs = gagnants (mainchain 🟦). pend[f] ↔ mainchain[f] sont partenaires (pend[f] < mainchain[f]).`});
+
+  // --- ÉTAPE 4 : chaîne de départ result = [pend0, main0, main1, ...] ---
+  const result=[];
+  result.push(pend[0]);
+  for(let i=0;i<mainchain.length;i++) result.push(mainchain[i]);
+  snap({phase:"chain0", level, blockSize, nbBlocks,
+    blocks: blocksFrom(mainchain,pend),
+    mainchain:mainchain.slice(), pend:pend.slice(),
+    result:result.slice(),
+    msg:`Chaîne de départ : on place a1 (pend[0]) en tête sans le comparer (on sait a1 < b1), puis toute la mainchain.`});
+
+  // --- ÉTAPE 5 : ordre d'insertion de Jacobsthal ---
+  const order=[]; const jacSeq=[];
+  let prev=1, jac=3;
+  while(prev < pend.length){
+    jacSeq.push(jac);
+    const hi = (jac < pend.length) ? jac : pend.length;
+    for(let i=hi;i>prev;i--) order.push(i-1);
+    const next = jac + 2*prev;
+    prev = jac; jac = next;
+  }
+  snap({phase:"jacobsthal", level, blockSize, nbBlocks,
+    blocks: blocksFrom(mainchain,pend),
+    mainchain:mainchain.slice(), pend:pend.slice(),
+    result:result.slice(), order:order.slice(), jac:jacSeq.slice(),
+    msg:`Ordre d'insertion via Jacobsthal (${jacSeq.join(", ")}) : on insère les perdants par paquets bornés, en ordre DÉCROISSANT dans chaque paquet → chaque recherche binaire tombe sur un intervalle 2^k-1.`});
+
+  // --- ÉTAPE 6 : insertion par recherche binaire bornée ---
+  for(let o=0;o<order.length;o++){
+    const f = order[o];
+    let low=0, high;
+    let partnerStart = null;
+    if(f < mainchain.length){
+      high=0;
+      while(result[high] !== mainchain[f]) high++;
+      partnerStart = mainchain[f];
+    } else {
+      high = result.length;
+    }
+    const value = vec[pend[f] + blockSize - 1];
+
+    snap({phase:"search-start", level, blockSize, nbBlocks,
+      blocks: blocksFrom(mainchain,pend),
+      mainchain:mainchain.slice(), pend:pend.slice(),
+      result:result.slice(), order:order.slice(), jac:jacSeq.slice(), orderIdx:o,
+      search:{f, partnerStart, low, high, mid:-1, value, insertedAt:-1},
+      msg:`Insertion de pend[${f}] (queue=${value}). Borne high = position du partenaire mainchain[${f}]${partnerStart===null?' (bloc isolé : pas de partenaire)':''}. On cherche entre [${low}, ${high}].`});
+
+    while(low<high){
+      const mid = Math.floor((low+high)/2);
+      const midVal = vec[result[mid] + blockSize - 1];
+      const goRight = midVal < value;
+      snap({phase:"search-step", level, blockSize, nbBlocks,
+        mainchain:mainchain.slice(), pend:pend.slice(),
+        result:result.slice(), order:order.slice(), jac:jacSeq.slice(), orderIdx:o,
+        search:{f, partnerStart, low, high, mid, value, insertedAt:-1},
+        msg:`medium=${mid} → queue ${midVal} ${goRight?'<':'≥'} ${value} ⇒ ${goRight?'low = medium+1 (à droite)':'high = medium (à gauche)'}.`});
+      if(goRight) low=mid+1; else high=mid;
+    }
+    result.splice(low,0,pend[f]);
+    snap({phase:"insert", level, blockSize, nbBlocks,
+      mainchain:mainchain.slice(), pend:pend.slice(),
+      result:result.slice(), order:order.slice(), jac:jacSeq.slice(), orderIdx:o,
+      search:{f, partnerStart, low, high:low, mid:-1, value, insertedAt:low},
+      msg:`Position trouvée : ${low}. On insère pend[${f}] (queue=${value}) dans result.`});
+  }
+
+  // --- ÉTAPE 7 : reconstruction de _vector ---
+  const sorted=[];
+  for(let i=0;i<result.length;i++)
+    for(let k=0;k<blockSize;k++) sorted.push(vec[result[i]+k]);
+  for(let i=nbBlocks*blockSize;i<vec.length;i++) sorted.push(vec[i]);
+  vec = sorted;
+  snap({phase:"rebuild", level, blockSize, nbBlocks,
+    result:result.slice(),
+    msg:`Reconstruction de _vector dans l'ordre de result (blocs entiers recopiés). Les éléments hors-bloc sont gardés tels quels pour les niveaux inférieurs.`});
+}
+
+function blocksFrom(mainchain, pend){
+  const win=new Set(mainchain), los=new Set(pend);
+  return {win, los};
+}
+
+/* ============================================================
+   2. RENDU
+   ============================================================ */
+
+let cur = 0;
+let autoTimer = null;
+
+const $ = id => document.getElementById(id);
+
+function blockBoundaries(e){
+  // renvoie la liste de blocs [{start, win, los, leftover:false}] + leftover cells
+  const out=[];
+  const bs = e.blockSize, nb = e.nbBlocks;
+  for(let b=0;b<nb;b++){
+    const start=b*bs;
+    let cls='';
+    if(e.blocks){
+      if(e.blocks.win.has(start)) cls='win';
+      else if(e.blocks.los.has(start)) cls='los';
+    }
+    out.push({start, bs, cls});
+  }
+  return {blocks:out, leftoverStart: nb*bs};
+}
+
+function render(){
+  const e = events[cur];
+  if(!e) return;
+
+  // pile de récursion
+  renderStack(e);
+
+  // badge niveau
+  $("levelbadge").textContent =
+    e.phase==="init"||e.phase==="done"
+      ? (e.phase==="done"?"Terminé":"Initialisation")
+      : `Niveau ${e.level}  ·  blockSize = ${e.blockSize}  ·  ${e.nbBlocks} blocs`;
+
+  // vecteur
+  renderVec(e);
+
+  // chaîne result
+  renderChain(e);
+
+  // panneau droit
+  renderPairs(e);
+  renderJac(e);
+  renderOrder(e);
+
+  // log
+  $("log").innerHTML = `<span class="phase">${e.phase}</span>${e.msg}`;
+  $("count").textContent = `${cur+1} / ${events.length}`;
+
+  $("first").disabled = $("prev").disabled = cur===0;
+  $("last").disabled  = $("next").disabled = cur===events.length-1;
+}
+
+function renderStack(e){
+  // reconstruit la pile depuis la séquence : on relit en arrière les niveaux actifs
+  const stack = $("stack");
+  stack.innerHTML="";
+  const maxLevel = Math.max(...events.map(x=>x.level));
+  for(let l=0;l<=maxLevel;l++){
+    const bs = 1<<l;
+    const div=document.createElement("div");
+    div.className="frame"+(l===e.level?" active":"");
+    div.innerHTML=`<span class="lvl">niveau ${l}</span><br><span class="bs">blockSize = ${bs}</span>`;
+    stack.appendChild(div);
+  }
+}
+
+function renderVec(e){
+  const row = $("vecrow");
+  row.innerHTML="";
+  const {blocks, leftoverStart} = blockBoundaries(e);
+
+  const swapSet = new Set(e.swapHi||[]);
+  const pairSet = new Set();
+  let queueSet = new Set();
+  if(e.pairs){
+    for(const [sa,sb] of e.pairs){ pairSet.add(sa); pairSet.add(sb); }
+    for(const [sa,sb] of e.pairs){
+      queueSet.add(sa+e.blockSize-1); queueSet.add(sb+e.blockSize-1);
+    }
+  }
+
+  for(const blk of blocks){
+    const bdiv=document.createElement("div");
+    bdiv.className="block"+(blk.cls?(" "+blk.cls):"");
+    if(blk.cls==='win') bdiv.innerHTML='<span class="tag">mainchain</span>';
+    if(blk.cls==='los') bdiv.innerHTML='<span class="tag">pend</span>';
+    for(let k=0;k<blk.bs;k++){
+      const idx=blk.start+k;
+      const cell=document.createElement("div");
+      cell.className="cell";
+      const isQueue = (k===blk.bs-1);
+      if(isQueue && (queueSet.has(idx) || (!e.pairs && (blk.bs>1)))) cell.classList.add("queue");
+      if(swapSet.has(idx)) cell.classList.add("ins");
+      cell.textContent = e.vec[idx];
+      bdiv.appendChild(cell);
+    }
+    row.appendChild(bdiv);
+  }
+  // leftover
+  for(let i=leftoverStart;i<e.vec.length;i++){
+    const cell=document.createElement("div");
+    cell.className="cell leftover";
+    cell.textContent=e.vec[i];
+    row.appendChild(cell);
+  }
+}
+
+function renderChain(e){
+  const box=$("chainbox");
+  if(!e.result){ box.style.display="none"; return; }
+  box.style.display="";
+  const chain=$("chain");
+  chain.innerHTML="";
+  const s=e.search;
+  for(let i=0;i<e.result.length;i++){
+    const start=e.result[i];
+    const cell=document.createElement("div");
+    cell.className="cell";
+    if(s){
+      if(i===s.mid) cell.classList.add("mid");
+      else if(i===s.low && s.mid<0 && s.insertedAt<0) cell.classList.add("lo");
+      if(i===s.high && i<e.result.length) cell.classList.add("hi");
+      if(i===s.insertedAt) cell.classList.add("ins");
+    }
+    // valeur = queue du bloc
+    cell.textContent = e.vec[start + e.blockSize - 1];
+    chain.appendChild(cell);
+  }
+  if(s){
+    $("searchinfo").textContent =
+      s.insertedAt>=0
+        ? `→ inséré en position ${s.insertedAt}`
+        : `f=${s.f} · valeur=${s.value} · low=${s.low} · high=${s.high}${s.mid>=0?` · medium=${s.mid}`:""}`;
+  } else $("searchinfo").textContent="";
+}
+
+function renderPairs(e){
+  const el=$("pairlist");
+  if(!e.mainchain || !e.pend){ el.innerHTML='<span class="muted">en attente…</span>'; return; }
+  el.innerHTML="";
+  const curF = e.search ? e.search.f : -1;
+  const n = Math.max(e.mainchain.length, e.pend.length);
+  for(let f=0;f<n;f++){
+    const div=document.createElement("div");
+    div.className="pair";
+    const losV = f<e.pend.length ? e.vec[e.pend[f]+e.blockSize-1] : null;
+    const winV = f<e.mainchain.length ? e.vec[e.mainchain[f]+e.blockSize-1] : null;
+    const losChip = losV!==null ? `<span class="chip los${f===curF?' cur':''}">${losV}</span>` : `<span class="chip muted">—</span>`;
+    const winChip = winV!==null ? `<span class="chip win">${winV}</span>` : `<span class="chip muted">isolé</span>`;
+    div.innerHTML = `<span class="muted">f${f}</span> ${losChip}<span class="arrow">↔</span>${winChip}`;
+    el.appendChild(div);
+  }
+}
+
+function renderJac(e){
+  const el=$("jacrow");
+  if(!e.jac){ el.innerHTML='<span class="muted">—</span>'; return; }
+  el.innerHTML="";
+  for(const j of e.jac){
+    const s=document.createElement("span");
+    s.className="jac used";
+    s.textContent=j;
+    el.appendChild(s);
+  }
+}
+
+function renderOrder(e){
+  const el=$("orderrow");
+  if(!e.order){ el.innerHTML='<span class="muted">—</span>'; return; }
+  el.innerHTML="";
+  e.order.forEach((f,i)=>{
+    const s=document.createElement("span");
+    s.className="ord";
+    if(e.orderIdx>=0){
+      if(i===e.orderIdx) s.classList.add("cur");
+      else if(i<e.orderIdx) s.classList.add("done");
+    }
+    s.textContent=`f${f}`;
+    el.appendChild(s);
+  });
+}
+
+/* ============================================================
+   3. CONTRÔLES
+   ============================================================ */
+
+function parseInput(str){
+  const toks = str.trim().split(/\s+/).filter(Boolean);
+  if(toks.length===0) throw new Error("séquence vide");
+  const out=[];
+  for(const t of toks){
+    if(!/^\d+$/.test(t)) throw new Error(`'${t}' n'est pas un entier positif`);
+    const v=parseInt(t,10);
+    if(v>2147483647) throw new Error(`'${t}' dépasse INT_MAX`);
+    out.push(v);
+  }
+  return out;
+}
+
+function doRun(){
+  stopAuto();
+  $("err").textContent="";
+  let values;
+  try { values = parseInput($("input").value); }
+  catch(err){ $("err").textContent = "Error : "+err.message; return; }
+  run(values);
+  cur=0;
+  render();
+}
+
+function go(i){ stopAuto(); cur=Math.max(0,Math.min(events.length-1,i)); render(); }
+
+function stopAuto(){ if(autoTimer){clearInterval(autoTimer);autoTimer=null;$("auto").textContent="⏯ Lecture auto";} }
+function toggleAuto(){
+  if(autoTimer){ stopAuto(); return; }
+  if(events.length===0) return;
+  $("auto").textContent="⏸ Pause";
+  autoTimer=setInterval(()=>{
+    if(cur>=events.length-1){ stopAuto(); return; }
+    cur++; render();
+  }, 650);
+}
+
+$("run").onclick=doRun;
+$("auto").onclick=toggleAuto;
+$("first").onclick=()=>go(0);
+$("prev").onclick =()=>go(cur-1);
+$("next").onclick =()=>go(cur+1);
+$("last").onclick =()=>go(events.length-1);
+$("input").addEventListener("keydown",ev=>{ if(ev.key==="Enter") doRun(); });
+document.addEventListener("keydown",ev=>{
+  if(ev.target.tagName==="INPUT") return;
+  if(ev.key==="ArrowRight") go(cur+1);
+  if(ev.key==="ArrowLeft")  go(cur-1);
+});
+
+// lancement initial
+doRun();
+</script>
+</body>
+</html>

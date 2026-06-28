@@ -1,5 +1,7 @@
 #include "./pmergeMe/PmergeMe.hpp"
+#include <bits/types/struct_timeval.h>
 #include <exception>
+#include <ostream>
 
 int	main(int argc, char **argv)
 {
@@ -11,7 +13,9 @@ int	main(int argc, char **argv)
 	PmergeMe	PmergeMe;
 	try
 	{
+		gettimeofday(&PmergeMe.start_time, NULL);
 		PmergeMe.solve(argc, argv);
+		std::cout << "Time to process a range of " << PmergeMe.getSizeOfVector()<< " elements with std::vector :" << &PmergeMe.end_vector - &PmergeMe.start_time << " us" << std::endl;
 	}
 	catch (std::exception &e)
 	{
