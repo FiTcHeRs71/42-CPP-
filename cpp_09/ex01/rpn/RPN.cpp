@@ -6,20 +6,20 @@
 /*===Canonical Form===*/
 RPN::RPN(void)
 {
-	std::cout << "RPN default constructor called" << std::endl;
+	//std::cout << "RPN default constructor called" << std::endl;
 }
 RPN::~RPN(void)
 {
-	std::cout << "RPN default destructor called" << std::endl;
+	//std::cout << "RPN default destructor called" << std::endl;
 }
 RPN::RPN(const RPN& to_copy)
 	:_list(to_copy._list)
 {
-	std::cout << "RPN copy constructor called" << std::endl;
+	//std::cout << "RPN copy constructor called" << std::endl;
 }
 RPN & RPN::operator=(const RPN& src)
 {
-	std::cout << "RPN oprator assignement(=) constructor called" << std::endl;
+	//std::cout << "RPN oprator assignement(=) constructor called" << std::endl;
 	if (this != &src)
 	{
 		this->_list = src._list;
