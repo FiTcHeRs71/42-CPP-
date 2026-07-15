@@ -45,7 +45,7 @@ void	RPN::run(std::string args)
 			{
 				case '+' : this->_list.push(b + a); break;
 				case '-' : this->_list.push(b - a); break;
-	    		case '*' : this->_list.push(b * a); break;
+				case '*' : this->_list.push(b * a); break;
 				case '/' :
 					if (a == 0)
 						throw DivisionByZero();
