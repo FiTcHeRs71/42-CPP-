@@ -59,7 +59,7 @@ void	RPN::run(std::string args)
 	if (this->_list.size() != 1)
 		throw InvalidExpression();
 	std::cout << this->_list.top() << std::endl;
-  }
+}
 
 
 double	RPN::popVal(void)
